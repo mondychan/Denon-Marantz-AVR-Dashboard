@@ -62,7 +62,7 @@ Browser  ◄──WebSocket──►  FastAPI Backend  ──telnet (23)──�
 ```yaml
 services:
   denon-dashboard:
-    image: ghcr.io/oxygenlack/denon-dashboard:latest
+    image: ghcr.io/mondychan/denon-marantz-avr-dashboard:latest
     container_name: denon-dashboard
     restart: unless-stopped
     network_mode: host        # required for SSDP auto-discovery
@@ -92,7 +92,7 @@ If you use Traefik or can't use `network_mode: host`, set the IP explicitly:
 ```yaml
 services:
   denon-dashboard:
-    image: ghcr.io/oxygenlack/denon-dashboard:latest
+    image: ghcr.io/mondychan/denon-marantz-avr-dashboard:latest
     container_name: denon-dashboard
     restart: unless-stopped
     ports:
