@@ -16,6 +16,24 @@ import AudioSettings from './components/AudioSettings'
 import MediaControls from './components/MediaControls'
 import Zone2Controls from './components/Zone2Controls'
 
+function NavTab({ icon, label, active, dim, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 min-w-0 transition-colors ${
+        active
+          ? 'text-denon-gold'
+          : dim
+          ? 'text-denon-muted/30'
+          : 'text-denon-muted hover:text-denon-text'
+      }`}
+    >
+      {icon}
+      <span className="text-[9px] font-medium leading-none truncate px-0.5">{label}</span>
+    </button>
+  )
+}
+
 // Fallback channel names if API hasn't loaded yet
 const FALLBACK_CHANNEL_NAMES = {
   FL: 'Front L', FR: 'Front R', C: 'Center', SW: 'Subwoofer',
@@ -110,7 +128,7 @@ export default function App() {
   ]
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pb-8 min-h-screen">
+    <div className="max-w-2xl mx-auto px-4 pb-24 sm:pb-8 min-h-screen">
       {/* Header + Health */}
       <MemoStatusBar
         deviceName={deviceName}
@@ -121,8 +139,8 @@ export default function App() {
         onThemeChange={setCurrentTheme}
       />
 
-      {/* Zone Selector */}
-      <div className="flex gap-0 mb-5 bg-denon-card/50 rounded-2xl p-1.5 border border-denon-border/50 backdrop-blur-sm">
+      {/* Zone Selector — hidden on mobile (bottom nav takes over) */}
+      <div className="hidden sm:flex gap-0 mb-5 bg-denon-card/50 rounded-2xl p-1.5 border border-denon-border/50 backdrop-blur-sm">
         <button
           onClick={() => setZone('main')}
           className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
@@ -154,8 +172,8 @@ export default function App() {
       {/* Main Zone */}
       {zone === 'main' && (
         <>
-          {/* Section tabs */}
-          <div className="flex gap-1 mb-4">
+          {/* Section tabs — hidden on mobile (bottom nav takes over) */}
+          <div className="hidden sm:flex gap-1 mb-4">
             {mainSections.map(s => (
               <button
                 key={s.id}
@@ -223,6 +241,73 @@ export default function App() {
           />
         </div>
       )}
+
+      {/* Mobile bottom navigation */}
+      <nav
+        className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-denon-card/95 backdrop-blur-md border-t border-denon-border/50 flex"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      >
+        <NavTab
+          onClick={() => setZone('main')}
+          active={zone === 'main'}
+          label={zoneName}
+          icon={
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+              <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+            </svg>
+          }
+        />
+        <NavTab
+          onClick={() => setZone('zone2')}
+          active={zone === 'zone2'}
+          label={z2Name}
+          icon={
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+              <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+              <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+            </svg>
+          }
+        />
+        <div className="w-px bg-denon-border/30 self-stretch my-2" />
+        <NavTab
+          onClick={() => { setZone('main'); setActiveSection('controls') }}
+          active={zone === 'main' && activeSection === 'controls'}
+          dim={zone !== 'main'}
+          label="Controls"
+          icon={
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+              <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
+              <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
+              <line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/>
+              <line x1="17" y1="16" x2="23" y2="16"/>
+            </svg>
+          }
+        />
+        <NavTab
+          onClick={() => { setZone('main'); setActiveSection('speakers') }}
+          active={zone === 'main' && activeSection === 'speakers'}
+          dim={zone !== 'main'}
+          label="Speakers"
+          icon={
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+              <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+          }
+        />
+        <NavTab
+          onClick={() => { setZone('main'); setActiveSection('audio') }}
+          active={zone === 'main' && activeSection === 'audio'}
+          dim={zone !== 'main'}
+          label="Audio"
+          icon={
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          }
+        />
+      </nav>
     </div>
   )
 }
