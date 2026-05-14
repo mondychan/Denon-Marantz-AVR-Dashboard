@@ -1,7 +1,9 @@
 import { useCallback } from 'react'
+import { DEMO_MODE } from '../demoData'
 
 export function useApi() {
   const post = useCallback(async (path, body = {}) => {
+    if (DEMO_MODE) return { ok: true }
     try {
       const res = await fetch(`/api/v1${path}`, {
         method: 'POST',

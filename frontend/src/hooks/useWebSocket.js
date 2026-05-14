@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { DEMO_MODE, DEMO_STATE, applyDemoCommand } from '../demoData'
 
 const RECONNECT_DELAY = 3000
 
 export function useWebSocket() {
-  const [state, setState] = useState(null)
-  const [wsConnected, setWsConnected] = useState(false)
+  const [state, setState] = useState(DEMO_MODE ? DEMO_STATE : null)
+  const [wsConnected, setWsConnected] = useState(DEMO_MODE)
   const wsRef = useRef(null)
   const reconnectTimer = useRef(null)
-  const lastJsonRef = useRef(null) // track serialized state for diffing
+  const lastJsonRef = useRef(null)
 
   const connect = useCallback(() => {
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
@@ -26,9 +27,6 @@ export function useWebSocket() {
 
     ws.onmessage = (e) => {
       try {
-        // Only trigger React re-render if the state payload actually changed.
-        // Avoids unnecessary re-renders from identical WebSocket pushes
-        // (e.g. heartbeat polls that return the same state).
         if (e.data !== lastJsonRef.current) {
           lastJsonRef.current = e.data
           setState(JSON.parse(e.data))
@@ -48,6 +46,7 @@ export function useWebSocket() {
   }, [])
 
   useEffect(() => {
+    if (DEMO_MODE) return
     connect()
     return () => {
       if (wsRef.current) wsRef.current.close()
@@ -56,6 +55,10 @@ export function useWebSocket() {
   }, [connect])
 
   const sendCommand = useCallback((command) => {
+    if (DEMO_MODE) {
+      setState(prev => applyDemoCommand(prev, command))
+      return
+    }
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ command }))
     }
