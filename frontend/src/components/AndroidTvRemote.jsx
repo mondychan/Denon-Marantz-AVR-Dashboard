@@ -460,19 +460,19 @@ export default function AndroidTvRemote({ state }) {
 
       {connected && (
       <div className="card relative space-y-5">
-        <div className="absolute left-5 top-5">
-          <IconButton label="Power" disabled={!connected} onClick={startPowerConfirm} feedbackState={fb('Power')} className="w-24 h-12 rounded-2xl bg-denon-red/80 border-denon-red/50">
+        <div className="absolute left-5 top-5 max-[520px]:static max-[520px]:flex max-[520px]:justify-start">
+          <IconButton label="Power" disabled={!connected} onClick={startPowerConfirm} feedbackState={fb('Power')} className="w-24 h-12 rounded-2xl bg-denon-red/80 border-denon-red/50 max-[520px]:w-16 max-[520px]:h-10 max-[520px]:rounded-xl">
             <RemoteIcon type="power" className="w-6 h-6" />
           </IconButton>
         </div>
 
-        <div className="relative mx-auto w-72 h-72 max-w-full">
+        <div className="relative mx-auto w-[min(18rem,100%)] aspect-square max-[380px]:w-[min(16.5rem,100%)]">
           <div className="absolute inset-0 rounded-full bg-denon-surface border border-denon-border shadow-inner" />
-          <IconButton label="Up" disabled={!connected} repeat feedbackState={fb('Up')} onClick={(meta) => sendKey(KEYS.up, 'Up', meta)} className="absolute left-1/2 top-4 -translate-x-1/2 w-24 h-16 rounded-3xl border-transparent bg-transparent"><RemoteIcon type="up" className="w-10 h-10" /></IconButton>
-          <IconButton label="Down" disabled={!connected} repeat feedbackState={fb('Down')} onClick={(meta) => sendKey(KEYS.down, 'Down', meta)} className="absolute left-1/2 bottom-4 -translate-x-1/2 w-24 h-16 rounded-3xl border-transparent bg-transparent"><RemoteIcon type="down" className="w-10 h-10" /></IconButton>
-          <IconButton label="Left" disabled={!connected} repeat feedbackState={fb('Left')} onClick={(meta) => sendKey(KEYS.left, 'Left', meta)} className="absolute left-4 top-1/2 -translate-y-1/2 w-16 h-24 rounded-3xl border-transparent bg-transparent"><RemoteIcon type="left" className="w-10 h-10" /></IconButton>
-          <IconButton label="Right" disabled={!connected} repeat feedbackState={fb('Right')} onClick={(meta) => sendKey(KEYS.right, 'Right', meta)} className="absolute right-4 top-1/2 -translate-y-1/2 w-16 h-24 rounded-3xl border-transparent bg-transparent"><RemoteIcon type="right" className="w-10 h-10" /></IconButton>
-          <IconButton label="OK" disabled={!connected} feedbackState={fb('OK')} onClick={() => sendKey(KEYS.ok, 'OK')} className="absolute left-1/2 top-1/2 w-28 h-28 -translate-x-1/2 -translate-y-1/2 rounded-full bg-denon-card border-denon-border text-2xl font-light">
+          <IconButton label="Up" disabled={!connected} repeat feedbackState={fb('Up')} onClick={(meta) => sendKey(KEYS.up, 'Up', meta)} className="absolute left-1/2 top-4 -translate-x-1/2 w-24 h-16 rounded-3xl border-transparent bg-transparent max-[380px]:top-3 max-[380px]:w-20 max-[380px]:h-14"><RemoteIcon type="up" className="w-10 h-10" /></IconButton>
+          <IconButton label="Down" disabled={!connected} repeat feedbackState={fb('Down')} onClick={(meta) => sendKey(KEYS.down, 'Down', meta)} className="absolute left-1/2 bottom-4 -translate-x-1/2 w-24 h-16 rounded-3xl border-transparent bg-transparent max-[380px]:bottom-3 max-[380px]:w-20 max-[380px]:h-14"><RemoteIcon type="down" className="w-10 h-10" /></IconButton>
+          <IconButton label="Left" disabled={!connected} repeat feedbackState={fb('Left')} onClick={(meta) => sendKey(KEYS.left, 'Left', meta)} className="absolute left-4 top-1/2 -translate-y-1/2 w-16 h-24 rounded-3xl border-transparent bg-transparent max-[380px]:left-3 max-[380px]:w-14 max-[380px]:h-20"><RemoteIcon type="left" className="w-10 h-10" /></IconButton>
+          <IconButton label="Right" disabled={!connected} repeat feedbackState={fb('Right')} onClick={(meta) => sendKey(KEYS.right, 'Right', meta)} className="absolute right-4 top-1/2 -translate-y-1/2 w-16 h-24 rounded-3xl border-transparent bg-transparent max-[380px]:right-3 max-[380px]:w-14 max-[380px]:h-20"><RemoteIcon type="right" className="w-10 h-10" /></IconButton>
+          <IconButton label="OK" disabled={!connected} feedbackState={fb('OK')} onClick={() => sendKey(KEYS.ok, 'OK')} className="absolute left-1/2 top-1/2 w-28 h-28 -translate-x-1/2 -translate-y-1/2 rounded-full bg-denon-card border-denon-border text-2xl font-light max-[380px]:w-24 max-[380px]:h-24">
             OK
           </IconButton>
         </div>
