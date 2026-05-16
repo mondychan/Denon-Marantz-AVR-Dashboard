@@ -522,8 +522,8 @@ export default function AndroidTvRemote({ state }) {
           </div>
         )}
 
-        <div className="absolute left-5 top-5 max-[520px]:static max-[520px]:flex max-[520px]:justify-start">
-          <IconButton label="Power" disabled={!connected} onClick={startPowerConfirm} feedbackState={fb('Power')} className="w-24 h-12 rounded-2xl bg-denon-red/80 border-denon-red/50 max-[520px]:w-16 max-[520px]:h-10 max-[520px]:rounded-xl">
+        <div className="flex justify-start">
+          <IconButton label="Power" disabled={!connected} onClick={startPowerConfirm} feedbackState={fb('Power')} className="h-10 w-16 rounded-xl bg-denon-red/80 border-denon-red/50 sm:h-12 sm:w-24 sm:rounded-2xl">
             <RemoteIcon type="power" className="w-6 h-6" />
           </IconButton>
         </div>
