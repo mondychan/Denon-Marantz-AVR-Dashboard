@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import ipaddress
+import asyncio
 import logging
 from typing import Literal
 
@@ -276,9 +277,18 @@ async def _try_adb_autoconnect(host: str) -> None:
     adb = app_state.android_adb
     if not adb.enabled:
         return
-    try:
-        saved = adb.load_last_host()
-        port = saved[1] if saved and saved[0] == host else adb.default_port
-        await adb.connect(host, port)
-    except Exception as exc:
-        _LOGGER.debug("ADB auto-connect to %s failed: %s", host, exc)
+    saved = adb.load_last_host()
+    port = saved[1] if saved and saved[0] == host else adb.default_port
+
+    async def _connect() -> None:
+        for attempt in range(1, 4):
+            try:
+                status = await adb.connect(host, port)
+                if status.get("connected"):
+                    await app_state.broadcast_state()
+                    return
+            except Exception as exc:
+                _LOGGER.debug("ADB auto-connect to %s attempt %d failed: %s", host, attempt, exc)
+            await asyncio.sleep(5)
+
+    asyncio.create_task(_connect())

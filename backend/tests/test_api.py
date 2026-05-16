@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import sys
 import os
+import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -344,6 +345,7 @@ async def test_androidtv_connect_autoconnects_adb(monkeypatch):
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         resp = await ac.post("/api/v1/androidtv/connect", json={"host": "192.168.1.120"})
     assert resp.status_code == 200
+    await asyncio.sleep(0)
     remote_connect.assert_called_once_with("192.168.1.120")
     adb_connect.assert_called_once_with("192.168.1.120", 5555)
 

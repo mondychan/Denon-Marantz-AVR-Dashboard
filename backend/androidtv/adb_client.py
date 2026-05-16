@@ -74,9 +74,11 @@ class AndroidTvAdbClient:
             self.serial = serial
             self._save_last_host()
             if "unable" in out.lower() or "failed" in out.lower():
-                self.last_error = out.strip()
+                self.last_error = out.strip() or "ADB connect failed"
+                raise AdbError(self.last_error)
             else:
                 self.last_error = None
+        await self._wait_for_device(timeout=12)
         return await self.status()
 
     async def pair(self, host: str, port: int, code: str) -> dict[str, Any]:
@@ -122,9 +124,9 @@ class AndroidTvAdbClient:
         base.update({"state": state, "connected": connected, "authorized": authorized})
         if connected:
             details, current_app, diagnostics = await asyncio.gather(
-                self.device_details(),
-                self.current_app(),
-                self.diagnostics(),
+                self._safe_status_part(self.device_details(), {}),
+                self._safe_status_part(self.current_app(), {"package": None, "activity": None, "name": None}),
+                self._safe_status_part(self.diagnostics(), {}),
             )
             base.update(details)
             base["current_app"] = current_app
@@ -314,6 +316,26 @@ class AndroidTvAdbClient:
             if "offline" in msg.lower():
                 return "offline"
             return None
+
+    async def _wait_for_device(self, timeout: float = 12) -> bool:
+        deadline = asyncio.get_running_loop().time() + timeout
+        last_state: str | None = None
+        while asyncio.get_running_loop().time() < deadline:
+            last_state = await self._get_state()
+            if last_state == "device":
+                self.last_error = None
+                return True
+            await asyncio.sleep(1)
+        self.last_error = f"ADB device not ready after connect (state: {last_state or 'unknown'})"
+        raise AdbError(self.last_error)
+
+    async def _safe_status_part(self, awaitable, fallback):
+        try:
+            return await awaitable
+        except Exception as exc:
+            self.last_error = str(exc) or exc.__class__.__name__
+            _LOGGER.debug("ADB status detail failed: %s", self.last_error)
+            return fallback
 
     async def _adb_available(self) -> bool:
         try:

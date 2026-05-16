@@ -61,6 +61,40 @@ async def _auto_discover_and_connect() -> None:
         await asyncio.sleep(30)
 
 
+async def _auto_connect_adb(host: str, port: int) -> None:
+    """Background task: connect ADB with retries after Android TV startup."""
+    if not settings.android_tv_adb_enabled:
+        return
+    for attempt in range(1, 13):
+        try:
+            _LOGGER.info(
+                "Connecting to Android TV ADB host %s:%s (attempt %d/12)...",
+                host,
+                port,
+                attempt,
+            )
+            status = await app_state.android_adb.connect(host, port)
+            if status.get("connected"):
+                _LOGGER.info("Android TV ADB connected to %s:%s", host, port)
+                await app_state.broadcast_state()
+                return
+            _LOGGER.warning(
+                "Android TV ADB connect returned state=%s",
+                status.get("state") or "unknown",
+            )
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            message = str(exc) or exc.__class__.__name__
+            _LOGGER.warning(
+                "Android TV ADB auto-connect attempt %d/12 failed: %s",
+                attempt,
+                message,
+            )
+        await asyncio.sleep(10)
+    _LOGGER.warning("Android TV ADB auto-connect gave up for %s:%s", host, port)
+
+
 # ---- Lifespan ----
 
 @asynccontextmanager
@@ -75,6 +109,7 @@ async def lifespan(app: FastAPI):
 
     # Track background tasks for graceful shutdown
     bg_task: asyncio.Task | None = None
+    adb_task: asyncio.Task | None = None
 
     host = settings.denon_host
     if host:
@@ -94,11 +129,7 @@ async def lifespan(app: FastAPI):
     adb_last_host = app_state.android_adb.load_last_host()
     if settings.android_tv_adb_enabled and (adb_last_host or android_tv_host):
         adb_host, adb_port = adb_last_host or (android_tv_host, settings.android_tv_adb_port)
-        _LOGGER.info("Connecting to Android TV ADB host %s:%s...", adb_host, adb_port)
-        try:
-            await app_state.android_adb.connect(adb_host, adb_port)
-        except Exception as exc:
-            _LOGGER.warning("Android TV ADB auto-connect failed: %s", exc)
+        adb_task = asyncio.create_task(_auto_connect_adb(adb_host, adb_port))
 
     yield
 
@@ -107,6 +138,12 @@ async def lifespan(app: FastAPI):
         bg_task.cancel()
         try:
             await bg_task
+        except asyncio.CancelledError:
+            pass
+    if adb_task and not adb_task.done():
+        adb_task.cancel()
+        try:
+            await adb_task
         except asyncio.CancelledError:
             pass
     if app_state.heos:
