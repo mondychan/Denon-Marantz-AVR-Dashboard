@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import AndroidTvAdbPanel from './AndroidTvAdbPanel'
 
 const KEYS = {
   up: 'DPAD_UP',
@@ -532,6 +533,8 @@ export default function AndroidTvRemote({ state }) {
         </div>
       </div>
       )}
+
+      <AndroidTvAdbPanel tv={tv} />
 
       {powerConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">

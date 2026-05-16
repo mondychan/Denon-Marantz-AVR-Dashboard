@@ -397,3 +397,118 @@ def test_androidtv_last_host_persistence(tmp_path):
 
     restored._delete_last_host()
     assert restored.load_last_host() is None
+
+
+# ── Android TV ADB ───────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_androidtv_adb_status(monkeypatch):
+    from main import app
+    from state import app_state
+
+    status = AsyncMock(return_value={"enabled": True, "connected": True, "model": "Box R 4K"})
+    monkeypatch.setattr(app_state.android_adb, "status", status)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        resp = await ac.get("/api/v1/androidtv/adb/status")
+    assert resp.status_code == 200
+    assert resp.json()["model"] == "Box R 4K"
+    status.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_androidtv_adb_connect(monkeypatch):
+    from main import app
+    from state import app_state
+
+    connect = AsyncMock(return_value={"enabled": True, "connected": True, "host": "192.168.1.120"})
+    monkeypatch.setattr(app_state.android_adb, "connect", connect)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        resp = await ac.post("/api/v1/androidtv/adb/connect", json={"host": "192.168.1.120", "port": 5555})
+    assert resp.status_code == 200
+    connect.assert_called_once_with("192.168.1.120", 5555)
+
+
+@pytest.mark.asyncio
+async def test_androidtv_adb_pair(monkeypatch):
+    from main import app
+    from state import app_state
+
+    pair = AsyncMock(return_value={"ok": True, "host": "192.168.1.120", "pair_port": 37123})
+    monkeypatch.setattr(app_state.android_adb, "pair", pair)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        resp = await ac.post(
+            "/api/v1/androidtv/adb/pair",
+            json={"host": "192.168.1.120", "port": 37123, "code": "123456"},
+        )
+    assert resp.status_code == 200
+    pair.assert_called_once_with("192.168.1.120", 37123, "123456")
+
+
+@pytest.mark.asyncio
+async def test_androidtv_adb_rejects_global_ip(monkeypatch):
+    from main import app
+    from state import app_state
+
+    connect = AsyncMock()
+    monkeypatch.setattr(app_state.android_adb, "connect", connect)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        resp = await ac.post("/api/v1/androidtv/adb/connect", json={"host": "8.8.8.8", "port": 5555})
+    assert resp.status_code == 400
+    connect.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_androidtv_adb_screenshot(monkeypatch):
+    from main import app
+    from state import app_state
+
+    screenshot = AsyncMock(return_value=b"\x89PNG\r\n\x1a\n")
+    monkeypatch.setattr(app_state.android_adb, "screenshot", screenshot)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        resp = await ac.get("/api/v1/androidtv/adb/screenshot")
+    assert resp.status_code == 200
+    assert resp.headers["content-type"] == "image/png"
+    assert resp.content.startswith(b"\x89PNG")
+
+
+@pytest.mark.asyncio
+async def test_androidtv_adb_launch_app(monkeypatch):
+    from main import app
+    from state import app_state
+
+    launch_app = AsyncMock(return_value={"ok": True})
+    monkeypatch.setattr(app_state.android_adb, "launch_app", launch_app)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        resp = await ac.post(
+            "/api/v1/androidtv/adb/apps/launch",
+            json={"package": "org.xbmc.kodi", "activity": ".Splash"},
+        )
+    assert resp.status_code == 200
+    launch_app.assert_called_once_with("org.xbmc.kodi", ".Splash")
+
+
+@pytest.mark.asyncio
+async def test_androidtv_adb_power(monkeypatch):
+    from main import app
+    from state import app_state
+
+    power_action = AsyncMock(return_value={"ok": True})
+    monkeypatch.setattr(app_state.android_adb, "power_action", power_action)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        resp = await ac.post("/api/v1/androidtv/adb/power", json={"action": "reboot"})
+    assert resp.status_code == 200
+    power_action.assert_called_once_with("reboot")

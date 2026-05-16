@@ -91,6 +91,15 @@ async def lifespan(app: FastAPI):
         _LOGGER.info("Connecting to Android TV host %s...", android_tv_host)
         await app_state.android_tv.connect(android_tv_host)
 
+    adb_last_host = app_state.android_adb.load_last_host()
+    if settings.android_tv_adb_enabled and adb_last_host:
+        adb_host, adb_port = adb_last_host
+        _LOGGER.info("Connecting to Android TV ADB host %s:%s...", adb_host, adb_port)
+        try:
+            await app_state.android_adb.connect(adb_host, adb_port)
+        except Exception as exc:
+            _LOGGER.warning("Android TV ADB auto-connect failed: %s", exc)
+
     yield
 
     # Graceful shutdown: cancel background tasks
@@ -105,6 +114,7 @@ async def lifespan(app: FastAPI):
     if app_state.telnet:
         await app_state.telnet.disconnect()
     await app_state.android_tv.disconnect()
+    await app_state.android_adb.disconnect()
 
 
 # ---- App ----
@@ -128,7 +138,7 @@ class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
         )
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            "img-src 'self' http: https:; "
+            "img-src 'self' blob: http: https:; "
             "style-src 'self' 'unsafe-inline'; "
             "script-src 'self'; "
             "connect-src 'self' ws: wss:; "

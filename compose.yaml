@@ -35,6 +35,9 @@ services:
       - DENON_DASHBOARD_DENON_HOST=
       # Set to your Android TV / Google TV IP for automatic remote connection.
       #- DENON_DASHBOARD_ANDROID_TV_HOST=192.168.1.120
+      # Optional ADB integration for screenshots, app launching and diagnostics.
+      #- DENON_DASHBOARD_ANDROID_TV_ADB_ENABLED=true
+      #- DENON_DASHBOARD_ANDROID_TV_ADB_PORT=5555
 
       # ── Port ─────────────────────────────────────────────────────────────────
       # Dashboard port (default 8080). Change if 8080 is taken on your host.
@@ -47,6 +50,7 @@ services:
       #- DENON_DASHBOARD_DENON_ZONE2_NAME=Zone 2
       #- DENON_DASHBOARD_DENON_SOURCE_NAMES={"GAME":"Game Console","TV":"TV Audio","NET":"Streaming","BD":"Blu-ray","BT":"Bluetooth"}
       #- DENON_DASHBOARD_ANDROID_TV_CLIENT_NAME=Denon Dashboard
+      #- DENON_DASHBOARD_ANDROID_TV_ADB_STORAGE_DIR=/data/adb
       #- DENON_DASHBOARD_LOG_LEVEL=INFO
 
     # ── Traefik labels (optional) ─────────────────────────────────────────────

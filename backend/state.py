@@ -10,6 +10,7 @@ from typing import Any
 from fastapi import WebSocket
 
 from config import settings
+from androidtv.adb_client import AndroidTvAdbClient
 from androidtv.remote_client import AndroidTvRemoteClient
 from denon.const import CHANNEL_NAMES, DEFAULT_SOURCES
 from denon.heos_client import HeosClient
@@ -36,6 +37,12 @@ class AppState:
             client_name=settings.android_tv_client_name,
             storage_dir=settings.android_tv_storage_dir,
             notify=self.broadcast_state,
+        )
+        self.android_adb = AndroidTvAdbClient(
+            enabled=settings.android_tv_adb_enabled,
+            adb_path=settings.android_tv_adb_path,
+            storage_dir=settings.android_tv_adb_storage_dir,
+            default_port=settings.android_tv_adb_port,
         )
 
     @property
@@ -196,6 +203,7 @@ class AppState:
             "play_state": self.media_state.get("play_state"),
             "stream_quality": self._detect_stream_quality(),
             "android_tv": self.android_tv.build_status(),
+            "android_adb": self.android_adb.build_status(),
         }
 
     async def broadcast_state(self) -> None:

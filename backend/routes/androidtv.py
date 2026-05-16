@@ -6,7 +6,7 @@ import logging
 from typing import Literal
 
 from androidtvremote2 import CannotConnect, ConnectionClosed, InvalidAuth
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, Field
 
 from androidtv.discovery import discover_android_tvs
@@ -56,6 +56,31 @@ class AndroidTvKeyRequest(BaseModel):
 
 class AndroidTvTextRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=500, pattern=r"^[^\r\n]+$")
+
+
+class AndroidTvAdbConnectRequest(BaseModel):
+    host: str = Field(..., min_length=2, max_length=80)
+    port: int = Field(5555, ge=1, le=65535)
+
+
+class AndroidTvAdbPairRequest(BaseModel):
+    host: str = Field(..., min_length=2, max_length=80)
+    port: int = Field(..., ge=1, le=65535)
+    code: str = Field(..., min_length=4, max_length=32, pattern=r"^\s*[A-Za-z0-9]{4,12}\s*$")
+
+
+class AndroidTvAdbAppRequest(BaseModel):
+    package: str = Field(..., min_length=3, max_length=200, pattern=r"^[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+$")
+    activity: str | None = Field(None, min_length=1, max_length=300, pattern=r"^(?:[A-Za-z0-9_.$]+|\.[A-Za-z0-9_.$]+)$")
+
+
+class AndroidTvAdbFavoriteRequest(BaseModel):
+    package: str = Field(..., min_length=3, max_length=200, pattern=r"^[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+$")
+    favorite: bool
+
+
+class AndroidTvAdbPowerRequest(BaseModel):
+    action: Literal["wake", "sleep", "power", "reboot"]
 
 
 @router.get("/status")
@@ -130,6 +155,87 @@ async def androidtv_text(req: AndroidTvTextRequest):
         raise HTTPException(400, str(exc))
 
 
+@router.get("/adb/status")
+async def androidtv_adb_status():
+    return await _adb_call(app_state.android_adb.status())
+
+
+@router.post("/adb/connect")
+async def androidtv_adb_connect(req: AndroidTvAdbConnectRequest):
+    host = _validate_lan_ip(req.host)
+    return await _adb_call(app_state.android_adb.connect(host, req.port))
+
+
+@router.post("/adb/pair")
+async def androidtv_adb_pair(req: AndroidTvAdbPairRequest):
+    host = _validate_lan_ip(req.host)
+    try:
+        return await _adb_call(app_state.android_adb.pair(host, req.port, req.code.strip()))
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@router.post("/adb/disconnect")
+async def androidtv_adb_disconnect():
+    return await _adb_call(app_state.android_adb.disconnect(clear_host=True))
+
+
+@router.get("/adb/diagnostics")
+async def androidtv_adb_diagnostics():
+    return await _adb_call(app_state.android_adb.diagnostics())
+
+
+@router.get("/adb/current-app")
+async def androidtv_adb_current_app():
+    return await _adb_call(app_state.android_adb.current_app())
+
+
+@router.get("/adb/apps")
+async def androidtv_adb_apps():
+    return {"apps": await _adb_call(app_state.android_adb.list_apps())}
+
+
+@router.post("/adb/apps/launch")
+async def androidtv_adb_launch_app(req: AndroidTvAdbAppRequest):
+    return await _adb_call(app_state.android_adb.launch_app(req.package, req.activity))
+
+
+@router.post("/adb/apps/force-stop")
+async def androidtv_adb_force_stop_app(req: AndroidTvAdbAppRequest):
+    return await _adb_call(app_state.android_adb.force_stop_app(req.package))
+
+
+@router.post("/adb/apps/favorite")
+async def androidtv_adb_favorite(req: AndroidTvAdbFavoriteRequest):
+    return await _adb_call(app_state.android_adb.set_favorite(req.package, req.favorite))
+
+
+@router.post("/adb/text")
+async def androidtv_adb_text(req: AndroidTvTextRequest):
+    try:
+        return await _adb_call(app_state.android_adb.send_text(req.text))
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@router.post("/adb/power")
+async def androidtv_adb_power(req: AndroidTvAdbPowerRequest):
+    try:
+        return await _adb_call(app_state.android_adb.power_action(req.action))
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@router.get("/adb/screenshot")
+async def androidtv_adb_screenshot():
+    data = await _adb_call(app_state.android_adb.screenshot())
+    return Response(
+        content=data,
+        media_type="image/png",
+        headers={"Cache-Control": "no-store"},
+    )
+
+
 def _validate_lan_ip(value: str) -> str:
     host = value.strip()
     ip_part = host.split("%", 1)[0]
@@ -141,3 +247,15 @@ def _validate_lan_ip(value: str) -> str:
     if not allowed or addr.is_loopback or addr.is_multicast or addr.is_unspecified:
         raise HTTPException(400, "IP address not allowed (must be a local LAN IP)")
     return host
+
+
+async def _adb_call(awaitable):
+    try:
+        return await awaitable
+    except RuntimeError as exc:
+        msg = str(exc)
+        if "disabled" in msg.lower():
+            raise HTTPException(403, msg)
+        if "not connected" in msg.lower():
+            raise HTTPException(503, msg)
+        raise HTTPException(502, msg or "ADB command failed")

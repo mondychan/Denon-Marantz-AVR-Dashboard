@@ -46,6 +46,7 @@ This project is hosted at [`mondychan/Denon-Marantz-AVR-Dashboard`](https://gith
 - **Network discovery** via mDNS and manual IP connection
 - **Quick connect** to the last connected Android TV on startup
 - **Text input** from the web UI to Android TV
+- **Optional ADB tools** for screenshots, current app, launchable apps, favorites, app launch/force-stop, ADB text input, wake/sleep/power/reboot, storage and IP diagnostics
 - **Independent operation** from the receiver connection
 
 ### Status & Monitoring
@@ -62,8 +63,8 @@ Browser  ◄──WebSocket──►  FastAPI Backend  ──telnet (23)──�
 ```
 
 - **Frontend**: React 19, Vite, Tailwind CSS (dark theme with gold accent)
-- **Backend**: FastAPI, async telnet client, HEOS CLI client, Android TV Remote v2 client
-- **Communication**: Telnet for receiver control, HEOS CLI (port 1255) for media playback, Android TV Remote protocol v2 for TV control
+- **Backend**: FastAPI, async telnet client, HEOS CLI client, Android TV Remote v2 client, optional ADB helper
+- **Communication**: Telnet for receiver control, HEOS CLI (port 1255) for media playback, Android TV Remote protocol v2 for TV control, optional ADB TCP for diagnostics/screenshots/app launching
 - **Real-time**: WebSocket pushes state changes to all connected browsers instantly
 
 ## Quick Start (Docker)
@@ -136,6 +137,9 @@ All configuration is via environment variables with the `DENON_DASHBOARD_` prefi
 | `DENON_DASHBOARD_ANDROID_TV_HOST` | *(empty)* | Android TV / Google TV IP. Leave empty to connect from the Android TV tab. |
 | `DENON_DASHBOARD_ANDROID_TV_CLIENT_NAME` | `Denon Dashboard` | Client name shown by Android TV during pairing. |
 | `DENON_DASHBOARD_ANDROID_TV_STORAGE_DIR` | `/data/androidtv` | Directory for Android TV pairing certificate/key and last connected host. |
+| `DENON_DASHBOARD_ANDROID_TV_ADB_ENABLED` | `false` | Enable optional Android TV ADB tools. Requires ADB debugging authorized on the Android TV device. |
+| `DENON_DASHBOARD_ANDROID_TV_ADB_PORT` | `5555` | Android TV ADB TCP port. |
+| `DENON_DASHBOARD_ANDROID_TV_ADB_STORAGE_DIR` | `/data/adb` | Directory for ADB state, keys and app favorites. |
 | `DENON_DASHBOARD_PORT` | `8080` | Dashboard port. Change if 8080 is already in use on your host (e.g. `8084`). |
 | `DENON_DASHBOARD_DENON_TELNET_PORT` | `23` | Telnet port — rarely needs changing. |
 | `DENON_DASHBOARD_DENON_DEVICE_NAME` | `Denon AVR` | Display name shown in the header. |
@@ -284,6 +288,19 @@ The dashboard exposes a full REST API at `/api/v1/`. All POST endpoints accept J
 | `POST` | `/api/v1/androidtv/pair/finish` | `{"code": "123456"}` | Finish pairing |
 | `POST` | `/api/v1/androidtv/key` | `{"key": "DPAD_CENTER"}` | Send a remote key |
 | `POST` | `/api/v1/androidtv/text` | `{"text": "search text"}` | Send text input |
+| `GET` | `/api/v1/androidtv/adb/status` | - | ADB connection, authorization, device details and diagnostics |
+| `POST` | `/api/v1/androidtv/adb/connect` | `{"host": "192.168.1.120", "port": 5555}` | Connect ADB over TCP |
+| `POST` | `/api/v1/androidtv/adb/pair` | `{"host": "192.168.1.120", "port": 37123, "code": "123456"}` | Pair ADB with the Wireless debugging pairing code and port |
+| `POST` | `/api/v1/androidtv/adb/disconnect` | - | Disconnect ADB and clear saved host |
+| `GET` | `/api/v1/androidtv/adb/screenshot` | - | Capture a PNG screenshot |
+| `GET` | `/api/v1/androidtv/adb/current-app` | - | Get focused package/activity |
+| `GET` | `/api/v1/androidtv/adb/apps` | - | List launchable apps |
+| `POST` | `/api/v1/androidtv/adb/apps/launch` | `{"package": "org.xbmc.kodi", "activity": ".Splash"}` | Launch an app |
+| `POST` | `/api/v1/androidtv/adb/apps/force-stop` | `{"package": "org.xbmc.kodi"}` | Force-stop an app |
+| `POST` | `/api/v1/androidtv/adb/apps/favorite` | `{"package": "org.xbmc.kodi", "favorite": true}` | Save app favorite |
+| `POST` | `/api/v1/androidtv/adb/text` | `{"text": "search text"}` | Send text input over ADB |
+| `POST` | `/api/v1/androidtv/adb/power` | `{"action": "wake"}` | Run `wake`, `sleep`, `power`, or `reboot` |
+| `GET` | `/api/v1/androidtv/adb/diagnostics` | - | ADB ping, storage and device IP |
 
 ### WebSocket
 
