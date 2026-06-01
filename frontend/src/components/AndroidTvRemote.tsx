@@ -202,13 +202,20 @@ export default function AndroidTvRemote({ state, activeAndroidPanel, setActiveAn
   const [powerConfirm, setPowerConfirm] = useState(false)
   const [powerCountdown, setPowerCountdown] = useState(10)
   const [detailsOpen, setDetailsOpen] = useState(false)
-  const [cardExpanded, setCardExpanded] = useState(!tv.connected)
+  const [cardExpanded, setCardExpanded] = useState(true)
   const [lastCommand, setLastCommand] = useState<{ label: string; latency: number; ok: boolean } | null>(null)
 
-  // Auto expand when disconnected
+  // Auto collapse on first connect, auto expand on disconnect
+  const hasConnectedOnce = useRef(false)
   useEffect(() => {
-    if (!tv.connected) {
+    if (tv.connected) {
+      if (!hasConnectedOnce.current) {
+        setCardExpanded(false)
+        hasConnectedOnce.current = true
+      }
+    } else {
       setCardExpanded(true)
+      hasConnectedOnce.current = false
     }
   }, [tv.connected])
   const [toast, setToast] = useState<string | null>(null)
