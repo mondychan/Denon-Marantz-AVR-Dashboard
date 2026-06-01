@@ -19,7 +19,7 @@ export default function AudioSettings({ state, post }: Props) {
   const ecoModes = ['ON', 'AUTO', 'OFF'] as const
 
   return (
-    <div className="card space-y-5">
+    <div className="card p-4 space-y-5">
       <h2 className="text-sm font-medium text-denon-muted">Audio Settings</h2>
 
       {/* MultEQ */}

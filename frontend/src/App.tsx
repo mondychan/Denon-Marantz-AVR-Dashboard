@@ -178,7 +178,7 @@ export default function App() {
           whileTap={{ scale: 0.97 }}
           className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
             zone === 'main'
-              ? 'bg-gradient-to-r from-denon-gold to-amber-500 text-denon-dark shadow-lg shadow-denon-gold/25'
+              ? 'bg-denon-gold text-denon-dark'
               : 'text-denon-muted hover:text-denon-text'
           }`}
         >
@@ -193,7 +193,7 @@ export default function App() {
           whileTap={{ scale: 0.97 }}
           className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
             zone === 'zone2'
-              ? 'bg-gradient-to-r from-denon-gold to-amber-500 text-denon-dark shadow-lg shadow-denon-gold/25'
+              ? 'bg-denon-gold text-denon-dark'
               : 'text-denon-muted hover:text-denon-text'
           }`}
         >
@@ -208,7 +208,7 @@ export default function App() {
           whileTap={{ scale: 0.97 }}
           className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
             zone === 'androidtv'
-              ? 'bg-gradient-to-r from-denon-gold to-amber-500 text-denon-dark shadow-lg shadow-denon-gold/25'
+              ? 'bg-denon-gold text-denon-dark'
               : 'text-denon-muted hover:text-denon-text'
           }`}
         >
@@ -258,7 +258,7 @@ export default function App() {
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeSection}
-                    className="space-y-4"
+                    className="grid grid-cols-1 lg:grid-cols-2 gap-4"
                     variants={fadeInUp}
                     initial="initial"
                     animate="animate"
@@ -267,29 +267,39 @@ export default function App() {
                   >
                     {activeSection === 'controls' && (
                       <>
+                        <div className="lg:col-span-2">
+                          <MemoVolumeControl state={state} sendCommand={sendCommand} post={post} />
+                        </div>
                         <MemoPowerControl state={state} sendCommand={sendCommand} zone="main" />
-                        <MemoVolumeControl state={state} sendCommand={sendCommand} post={post} />
                         <MemoMediaControls state={state} sendCommand={sendCommand} post={post} />
-                        <MemoSourceSelector
-                          state={state}
-                          sendCommand={sendCommand}
-                          sources={configuredSources}
-                          sourceNameMap={sourceNameMap}
-                        />
-                        <SurroundMode state={state} sendCommand={sendCommand} />
+                        <div className="lg:col-span-2">
+                          <MemoSourceSelector
+                            state={state}
+                            sendCommand={sendCommand}
+                            sources={configuredSources}
+                            sourceNameMap={sourceNameMap}
+                          />
+                        </div>
+                        <div className="lg:col-span-2">
+                          <SurroundMode state={state} sendCommand={sendCommand} />
+                        </div>
                       </>
                     )}
 
                     {activeSection === 'speakers' && (
                       <>
-                        <MemoChannelLevels
-                          channels={state.channel_volumes ?? {}}
-                          channelNames={channelNames}
-                          sendCommand={sendCommand}
-                          post={post}
-                          calibration={state.speaker_calibration}
-                        />
-                        <SubwooferLevel state={state} post={post} />
+                        <div className="lg:col-span-2">
+                          <MemoChannelLevels
+                            channels={state.channel_volumes ?? {}}
+                            channelNames={channelNames}
+                            sendCommand={sendCommand}
+                            post={post}
+                            calibration={state.speaker_calibration}
+                          />
+                        </div>
+                        <div className="lg:col-span-2">
+                          <SubwooferLevel state={state} post={post} />
+                        </div>
                       </>
                     )}
 

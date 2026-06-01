@@ -29,7 +29,7 @@ export default function SubwooferLevel({ state, post }: Props) {
   }, [post])
 
   return (
-    <div className="card">
+    <div className="card p-4">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-medium text-denon-muted">Subwoofer Level</h2>
         <span className="text-xs tabular-nums text-denon-text">{dB(level)} dB</span>

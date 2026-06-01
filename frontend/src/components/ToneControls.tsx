@@ -39,9 +39,9 @@ export default function ToneControls({ state, post }: Props) {
   }, [post])
 
   return (
-    <div className="card">
+    <div className="card p-4">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xs font-medium text-denon-muted uppercase tracking-wider">Tone Controls</h2>
+        <h2 className="text-[11px] text-denon-muted/70">Tone controls</h2>
         <button
           onClick={() => post('/tone', { enabled: !toneOn })}
           className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${

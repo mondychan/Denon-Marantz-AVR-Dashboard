@@ -47,7 +47,7 @@ export default function MediaControls({ state, zone = 'main' }: Props) {
 
   return (
     <div className="card">
-      <h2 className="text-xs font-medium text-denon-muted uppercase tracking-wider mb-3">Now Playing</h2>
+      <h2 className="text-sm font-semibold text-denon-text mb-3">Now Playing</h2>
 
       {(title ?? subtitle) && (
         <div className="flex items-center gap-3 mb-4">
@@ -95,7 +95,7 @@ export default function MediaControls({ state, zone = 'main' }: Props) {
           onClick={() => doMedia(isPlaying ? 'pause' : 'play')}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.92 }}
-          className="w-14 h-14 rounded-2xl bg-gradient-to-br from-denon-gold to-amber-600 text-denon-dark shadow-lg shadow-denon-gold/25 hover:brightness-110 transition-all flex items-center justify-center"
+          className="w-14 h-14 rounded-2xl bg-denon-gold text-denon-dark shadow-md shadow-denon-gold/20 hover:brightness-110 transition-all flex items-center justify-center"
           title={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? (

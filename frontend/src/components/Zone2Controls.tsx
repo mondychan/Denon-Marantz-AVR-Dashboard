@@ -32,20 +32,22 @@ export default function Zone2Controls({ state, sendCommand, post, sources, sourc
   }, [post])
 
   return (
-    <div className="space-y-4">
-      <PowerControl state={state} sendCommand={sendCommand} zone="zone2" />
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="lg:col-span-2">
+        <PowerControl state={state} sendCommand={sendCommand} zone="zone2" />
+      </div>
 
-      <div className="card">
+      <div className="card lg:col-span-2">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="text-xs font-medium text-denon-muted uppercase tracking-wider mb-1">Volume</h2>
-            <p className="text-2xl font-bold tabular-nums">{localVol ?? '—'}</p>
+            <p className="text-2xl sm:text-3xl lg:text-4xl font-bold tabular-nums">{localVol ?? '—'}</p>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => sendCommand('Z2DOWN')} className="btn-ghost w-10 h-10 flex items-center justify-center text-lg font-bold">−</button>
+            <button onClick={() => sendCommand('Z2DOWN')} className="btn-ghost w-11 h-11 flex items-center justify-center text-xl font-bold">−</button>
             <button
               onClick={() => sendCommand(muted ? 'Z2MUOFF' : 'Z2MUON')}
-              className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${
+              className={`w-11 h-11 flex items-center justify-center rounded-xl transition-all ${
                 muted
                   ? 'bg-denon-red/20 text-denon-red ring-1 ring-denon-red/30'
                   : 'bg-denon-surface/70 text-denon-muted hover:bg-denon-border'
@@ -60,7 +62,7 @@ export default function Zone2Controls({ state, sendCommand, post, sources, sourc
                 )}
               </svg>
             </button>
-            <button onClick={() => sendCommand('Z2UP')} className="btn-ghost w-10 h-10 flex items-center justify-center text-lg font-bold">+</button>
+            <button onClick={() => sendCommand('Z2UP')} className="btn-ghost w-11 h-11 flex items-center justify-center text-xl font-bold">+</button>
           </div>
         </div>
         <input
@@ -71,8 +73,12 @@ export default function Zone2Controls({ state, sendCommand, post, sources, sourc
         />
       </div>
 
-      <MediaControls state={state} sendCommand={sendCommand} post={post} zone="zone2" />
-      <SourceSelector state={state} sendCommand={sendCommand} sources={sources} sourceNameMap={sourceNameMap} zone="zone2" />
+      <div className="lg:col-span-2">
+        <MediaControls state={state} sendCommand={sendCommand} post={post} zone="zone2" />
+      </div>
+      <div className="lg:col-span-2">
+        <SourceSelector state={state} sendCommand={sendCommand} sources={sources} sourceNameMap={sourceNameMap} zone="zone2" />
+      </div>
     </div>
   )
 }

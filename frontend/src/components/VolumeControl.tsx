@@ -34,21 +34,20 @@ export default function VolumeControl({ state, sendCommand, post }: Props) {
   }, [post])
 
   return (
-    <div className="card">
+    <div className="card border-l-4 border-l-denon-gold">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-xs font-medium text-denon-muted uppercase tracking-wider mb-1">Volume</h2>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold tabular-nums text-denon-text">
               {displayVol != null ? displayVol : '—'}
             </span>
-            <span className="text-sm text-denon-muted">{dB} dB</span>
+            <span className="text-lg text-denon-muted">{dB} dB</span>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => sendCommand('MVDOWN')}
-            className="btn-ghost w-10 h-10 flex items-center justify-center text-lg font-bold rounded-xl"
+            className="btn-ghost w-11 h-11 flex items-center justify-center text-xl font-bold rounded-xl"
           >−</button>
           <button
             onClick={() => sendCommand(muted ? 'MUOFF' : 'MUON')}
@@ -69,7 +68,7 @@ export default function VolumeControl({ state, sendCommand, post }: Props) {
           </button>
           <button
             onClick={() => sendCommand('MVUP')}
-            className="btn-ghost w-10 h-10 flex items-center justify-center text-lg font-bold rounded-xl"
+            className="btn-ghost w-11 h-11 flex items-center justify-center text-xl font-bold rounded-xl"
           >+</button>
         </div>
       </div>

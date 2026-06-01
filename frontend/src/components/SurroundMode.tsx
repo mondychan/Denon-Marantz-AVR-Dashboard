@@ -119,7 +119,7 @@ export default function SurroundMode({ state, sendCommand }: Props) {
     <>
       <div className="card">
         <h2 className="text-sm font-medium text-denon-muted mb-3">Cycle Modes</h2>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {CATEGORIES.map(cat => (
             <motion.button
               key={cat.command}
@@ -229,7 +229,7 @@ export default function SurroundMode({ state, sendCommand }: Props) {
                   whileTap={{ scale: 0.97 }}
                   className={`group relative py-2.5 px-3 rounded-xl text-xs font-medium transition-all text-left overflow-hidden ${
                     playing
-                      ? 'bg-gradient-to-br from-denon-gold/20 to-amber-500/10 text-denon-gold ring-1 ring-denon-gold/40'
+                      ? 'bg-denon-gold/15 text-denon-gold ring-1 ring-denon-gold/40'
                       : infoMode && hasInfo
                         ? 'bg-denon-surface/70 text-denon-text ring-1 ring-denon-gold/20 hover:ring-denon-gold/40'
                         : 'bg-denon-surface/70 text-denon-text hover:bg-denon-surface'

@@ -144,7 +144,7 @@ export default function SourceSelector({ state, sendCommand, sources, sourceName
               whileTap={{ scale: 0.97 }}
               className={`group relative py-3 px-3 rounded-xl text-sm font-medium transition-all duration-150 text-left overflow-hidden ${
                 active
-                  ? 'bg-gradient-to-br from-denon-gold/20 to-amber-500/10 text-denon-gold ring-1 ring-denon-gold/40'
+                  ? 'bg-denon-gold/15 text-denon-gold ring-1 ring-denon-gold/40'
                   : 'bg-denon-surface/70 text-denon-text hover:bg-denon-surface'
               }`}
             >

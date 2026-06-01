@@ -46,8 +46,8 @@
 
 @layer components {
   .card {
-    @apply backdrop-blur-sm rounded-2xl border p-5 shadow-lg shadow-black/10;
-    background-color: color-mix(in srgb, var(--card) 80%, transparent);
+    @apply rounded-2xl border p-5 shadow-lg shadow-black/10;
+    background-color: var(--card);
     border-color: color-mix(in srgb, var(--border) 50%, transparent);
   }
   .btn {
