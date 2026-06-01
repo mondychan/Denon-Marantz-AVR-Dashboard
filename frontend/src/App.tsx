@@ -74,6 +74,7 @@ export default function App() {
   const [zone, setZone] = useState<ZoneTab>('main')
   const [activeSection, setActiveSection] = useState<Section>('controls')
   const [themeModalOpen, setThemeModalOpen] = useState(false)
+  const [activeAndroidPanel, setActiveAndroidPanel] = useState('remote')
 
   useEffect(() => {
     if (state?.theme_config) applyThemeConfig(state.theme_config)
@@ -341,7 +342,11 @@ export default function App() {
             exit="exit"
             transition={FAST}
           >
-            <MemoAndroidTvRemote state={state} />
+            <MemoAndroidTvRemote
+              state={state}
+              activeAndroidPanel={activeAndroidPanel}
+              setActiveAndroidPanel={setActiveAndroidPanel}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -383,44 +388,99 @@ export default function App() {
           }
         />
         <div className="w-px bg-denon-border/30 self-stretch my-2" />
-        <NavTab
-          onClick={() => { setZone('main'); setActiveSection('controls') }}
-          active={zone === 'main' && activeSection === 'controls'}
-          dim={zone !== 'main'}
-          label="Controls"
-          icon={
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-              <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
-              <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
-              <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
-              <line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/>
-              <line x1="17" y1="16" x2="23" y2="16"/>
-            </svg>
-          }
-        />
-        <NavTab
-          onClick={() => { setZone('main'); setActiveSection('speakers') }}
-          active={zone === 'main' && activeSection === 'speakers'}
-          dim={zone !== 'main'}
-          label="Speakers"
-          icon={
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-              <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-            </svg>
-          }
-        />
-        <NavTab
-          onClick={() => { setZone('main'); setActiveSection('audio') }}
-          active={zone === 'main' && activeSection === 'audio'}
-          dim={zone !== 'main'}
-          label="Audio"
-          icon={
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-            </svg>
-          }
-        />
+        {zone !== 'androidtv' ? (
+          <>
+            <NavTab
+              onClick={() => { setZone('main'); setActiveSection('controls') }}
+              active={zone === 'main' && activeSection === 'controls'}
+              dim={zone !== 'main'}
+              label="Controls"
+              icon={
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                  <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
+                  <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
+                  <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
+                  <line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/>
+                  <line x1="17" y1="16" x2="23" y2="16"/>
+                </svg>
+              }
+            />
+            <NavTab
+              onClick={() => { setZone('main'); setActiveSection('speakers') }}
+              active={zone === 'main' && activeSection === 'speakers'}
+              dim={zone !== 'main'}
+              label="Speakers"
+              icon={
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                  <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                </svg>
+              }
+            />
+            <NavTab
+              onClick={() => { setZone('main'); setActiveSection('audio') }}
+              active={zone === 'main' && activeSection === 'audio'}
+              dim={zone !== 'main'}
+              label="Audio"
+              icon={
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+              }
+            />
+          </>
+        ) : (
+          <>
+            <NavTab
+              onClick={() => setActiveAndroidPanel('remote')}
+              active={activeAndroidPanel === 'remote'}
+              label="Remote"
+              icon={
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                  <rect x="5" y="2" width="14" height="20" rx="2" />
+                  <circle cx="12" cy="18" r="1.5" />
+                  <path d="M8 6h8M8 10h8M10 14h4" />
+                </svg>
+              }
+            />
+            <NavTab
+              onClick={() => setActiveAndroidPanel('screen')}
+              active={activeAndroidPanel === 'screen'}
+              label="Screen"
+              icon={
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M21 15l-5-5L5 21" />
+                  <circle cx="9" cy="9" r="2" />
+                </svg>
+              }
+            />
+            <NavTab
+              onClick={() => setActiveAndroidPanel('apps')}
+              active={activeAndroidPanel === 'apps'}
+              label="Apps"
+              icon={
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                </svg>
+              }
+            />
+            <NavTab
+              onClick={() => setActiveAndroidPanel('adb')}
+              active={activeAndroidPanel === 'adb'}
+              label="ADB"
+              icon={
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                  <polyline points="4 17 10 11 4 5" />
+                  <line x1="12" y1="19" x2="20" y2="19" />
+                </svg>
+              }
+            />
+          </>
+        )}
       </nav>
 
       <AnimatePresence>

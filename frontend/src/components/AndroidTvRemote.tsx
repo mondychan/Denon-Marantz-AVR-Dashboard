@@ -187,9 +187,11 @@ function vibrate() {
 
 interface Props {
   state: ReceiverState
+  activeAndroidPanel: string
+  setActiveAndroidPanel: (panel: string) => void
 }
 
-export default function AndroidTvRemote({ state }: Props) {
+export default function AndroidTvRemote({ state, activeAndroidPanel, setActiveAndroidPanel }: Props) {
   const tv = (state.android_tv || {}) as any
   const [manualIp, setManualIp] = useState(tv.host || '')
   const [pairCode, setPairCode] = useState('')
@@ -200,8 +202,15 @@ export default function AndroidTvRemote({ state }: Props) {
   const [powerConfirm, setPowerConfirm] = useState(false)
   const [powerCountdown, setPowerCountdown] = useState(10)
   const [detailsOpen, setDetailsOpen] = useState(false)
-  const [activeAndroidPanel, setActiveAndroidPanel] = useState('remote')
+  const [cardExpanded, setCardExpanded] = useState(!tv.connected)
   const [lastCommand, setLastCommand] = useState<{ label: string; latency: number; ok: boolean } | null>(null)
+
+  // Auto expand when disconnected
+  useEffect(() => {
+    if (!tv.connected) {
+      setCardExpanded(true)
+    }
+  }, [tv.connected])
   const [toast, setToast] = useState<string | null>(null)
   const [activeFeedback, setActiveFeedback] = useState<{ label: string; state: 'ok' | 'fail' } | null>(null)
   const [adbStatus, setAdbStatus] = useState<AndroidAdbState | null>(state.android_adb || null)
@@ -374,183 +383,201 @@ export default function AndroidTvRemote({ state }: Props) {
 
   return (
     <div className="space-y-4 fade-in">
-      <div className="card">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-semibold text-denon-text">Android TV</h2>
-            <p className="text-xs text-denon-muted mt-1">
-              {tv.device_name || tv.device_info?.model || tv.host || 'Remote protocol v2'}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            {connected && (
-              <button
-                type="button"
-                disabled={busy !== null}
-                onClick={disconnect}
-                className="text-xs font-medium text-denon-gold hover:text-denon-text disabled:opacity-40"
-              >
-                Change device
-              </button>
-            )}
+      {/* Collapsible Status Bar */}
+      {!cardExpanded ? (
+        <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-denon-border/30 bg-denon-card/30 backdrop-blur-sm">
+          <span className="text-xs font-semibold text-denon-text">Android TV Info</span>
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setDetailsOpen(open => !open)}
+              onClick={() => setCardExpanded(true)}
               className={`${statusClass} cursor-pointer hover:brightness-110 flex items-center gap-1.5`}
             >
-              <span className={`w-2 h-2 rounded-full ${connected ? 'bg-denon-green' : tv.pairing || tv.host ? 'bg-denon-muted' : 'bg-denon-red'}`} />
-              {statusLabel}
-              <svg className={`w-3 h-3 transition-transform ${detailsOpen ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
+              <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-denon-green' : 'bg-denon-red'}`} />
+              Remote: {connected ? 'OK' : 'Off'}
             </button>
             <button
               type="button"
-              onClick={() => setActiveAndroidPanel('adb')}
+              onClick={() => {
+                setActiveAndroidPanel('adb')
+                setCardExpanded(true)
+              }}
               className={`${adbStatusClass} cursor-pointer hover:brightness-110 flex items-center gap-1.5`}
             >
-              <span className={`w-2 h-2 rounded-full ${adb.connected ? 'bg-denon-green' : 'bg-denon-red'}`} />
-              {adbStatusLabel}
+              <span className={`w-1.5 h-1.5 rounded-full ${adb.connected ? 'bg-denon-green' : 'bg-denon-red'}`} />
+              ADB: {adb.connected ? 'OK' : 'Off'}
             </button>
           </div>
         </div>
+      ) : (
+        <div className="card">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h2 className="text-sm font-semibold text-denon-text">Android TV</h2>
+                {connected && (
+                  <button
+                    type="button"
+                    onClick={() => setCardExpanded(false)}
+                    className="text-denon-muted hover:text-denon-text transition-colors p-0.5 rounded"
+                    title="Collapse settings"
+                  >
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 15l-6-6-6 6"/></svg>
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-denon-muted mt-1">
+                {tv.device_name || tv.device_info?.model || tv.host || 'Remote protocol v2'}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              {connected && (
+                <button
+                  type="button"
+                  disabled={busy !== null}
+                  onClick={disconnect}
+                  className="text-xs font-medium text-denon-gold hover:text-denon-text disabled:opacity-40"
+                >
+                  Change device
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setDetailsOpen(open => !open)}
+                className={`${statusClass} cursor-pointer hover:brightness-110 flex items-center gap-1.5`}
+              >
+                <span className={`w-2 h-2 rounded-full ${connected ? 'bg-denon-green' : tv.pairing || tv.host ? 'bg-denon-muted' : 'bg-denon-red'}`} />
+                {statusLabel}
+                <svg className={`w-3 h-3 transition-transform ${detailsOpen ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveAndroidPanel('adb')}
+                className={`${adbStatusClass} cursor-pointer hover:brightness-110 flex items-center gap-1.5`}
+              >
+                <span className={`w-2 h-2 rounded-full ${adb.connected ? 'bg-denon-green' : 'bg-denon-red'}`} />
+                {adbStatusLabel}
+              </button>
+            </div>
+          </div>
 
-        <AnimatePresence>
-          {detailsOpen && (
-            <motion.div
-              variants={fadeInUp}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={SPRING}
-              className="mt-4 rounded-xl border border-denon-border/50 bg-denon-surface/40 p-3 text-xs space-y-1.5"
-            >
-              <div className="flex justify-between gap-3">
-                <span className="text-denon-muted">Android TV</span>
-                <span className={connected ? 'text-denon-green' : tv.host ? 'text-denon-muted' : 'text-denon-red'}>{connected ? 'Connected' : tv.host ? 'Reconnecting...' : 'Disconnected'}</span>
-              </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-denon-muted">IP</span>
-                <span className="font-mono text-denon-text truncate">{tv.host || '-'}</span>
-              </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-denon-muted">Device</span>
-                <span className="text-denon-text truncate">{tv.device_name || tv.device_info?.model || '-'}</span>
-              </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-denon-muted">Last command</span>
-                <span className={lastCommand?.ok === false ? 'text-denon-red' : 'text-denon-text'}>{lastCommand?.label || '-'}</span>
-              </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-denon-muted">Latency</span>
-                <span className="text-denon-text">{lastCommand?.latency ? `${lastCommand.latency} ms` : '-'}</span>
-              </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-denon-muted">Muted</span>
-                <span className={tv.muted ? 'text-denon-gold' : 'text-denon-text'}>{tv.muted === true ? 'Yes' : tv.muted === false ? 'No' : '-'}</span>
-              </div>
-              {lastError && (
+          <AnimatePresence>
+            {detailsOpen && (
+              <motion.div
+                variants={fadeInUp}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={SPRING}
+                className="mt-4 rounded-xl border border-denon-border/50 bg-denon-surface/40 p-3 text-xs space-y-1.5"
+              >
                 <div className="flex justify-between gap-3">
-                  <span className="text-denon-muted">Last error</span>
-                  <span className="text-denon-red text-right">{lastError}</span>
+                  <span className="text-denon-muted">Android TV</span>
+                  <span className={connected ? 'text-denon-green' : tv.host ? 'text-denon-muted' : 'text-denon-red'}>{connected ? 'Connected' : tv.host ? 'Reconnecting...' : 'Disconnected'}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-denon-muted">IP</span>
+                  <span className="font-mono text-denon-text truncate">{tv.host || '-'}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-denon-muted">Device</span>
+                  <span className="text-denon-text truncate">{tv.device_name || tv.device_info?.model || '-'}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-denon-muted">Last command</span>
+                  <span className={lastCommand?.ok === false ? 'text-denon-red' : 'text-denon-text'}>{lastCommand?.label || '-'}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-denon-muted">Latency</span>
+                  <span className="text-denon-text">{lastCommand?.latency ? `${lastCommand.latency} ms` : '-'}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-denon-muted">Muted</span>
+                  <span className={tv.muted ? 'text-denon-gold' : 'text-denon-text'}>{tv.muted === true ? 'Yes' : tv.muted === false ? 'No' : '-'}</span>
+                </div>
+                {lastError && (
+                  <div className="flex justify-between gap-3">
+                    <span className="text-denon-muted">Last error</span>
+                    <span className="text-denon-red text-right">{lastError}</span>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {!connected && (
+            <div className="mt-5 space-y-4">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={manualIp}
+                  onChange={e => setManualIp(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && manualIp && connect()}
+                  placeholder="192.168.1.120"
+                  className="flex-1 bg-denon-surface border border-denon-border rounded-xl px-3 py-2 text-sm text-denon-text placeholder-denon-muted focus:outline-none focus:border-denon-gold/50"
+                />
+                <button className="btn-primary font-medium" disabled={!manualIp || busy !== null} onClick={() => connect()}>
+                  {busy === '/connect' ? 'Connecting...' : 'Connect'}
+                </button>
+              </div>
+
+              <div className="flex gap-2">
+                <button className="btn-ghost flex-1 font-medium" disabled={busy === 'scan'} onClick={scan}>
+                  {busy === 'scan' ? 'Scanning...' : 'Scan network'}
+                </button>
+                <button className="btn-ghost flex-1 font-medium" disabled={!manualIp || busy !== null} onClick={() => startPairing()}>
+                  {busy === '/pair/start' ? 'Pairing...' : 'Start pairing'}
+                </button>
+              </div>
+
+              {devices && devices.length > 0 && (
+                <div className="space-y-2">
+                  {devices.map(device => (
+                    <button
+                      key={device.ip}
+                      type="button"
+                      onClick={() => selectDevice(device)}
+                      disabled={busy !== null}
+                      className="w-full flex items-center justify-between p-3 rounded-xl bg-denon-surface border border-denon-border hover:border-denon-gold/50 transition-colors text-left"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-denon-text">{device.name}</p>
+                        <p className="text-xs text-denon-muted mt-0.5">{device.ip} / Select to connect</p>
+                      </div>
+                      <RemoteIcon type="right" className="w-4 h-4 text-denon-gold" />
+                    </button>
+                  ))}
                 </div>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
 
-        {!connected && (
-          <div className="mt-5 space-y-4">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={manualIp}
-                onChange={e => setManualIp(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && manualIp && connect()}
-                placeholder="192.168.1.120"
-                className="flex-1 bg-denon-surface border border-denon-border rounded-xl px-3 py-2 text-sm text-denon-text placeholder-denon-muted focus:outline-none focus:border-denon-gold/50"
-              />
-              <button className="btn-primary font-medium" disabled={!manualIp || busy !== null} onClick={() => connect()}>
-                {busy === '/connect' ? 'Connecting...' : 'Connect'}
-              </button>
-            </div>
-
-            <div className="flex gap-2">
-              <button className="btn-ghost flex-1 font-medium" disabled={busy === 'scan'} onClick={scan}>
-                {busy === 'scan' ? 'Scanning...' : 'Scan network'}
-              </button>
-              <button className="btn-ghost flex-1 font-medium" disabled={!manualIp || busy !== null} onClick={() => startPairing()}>
-                {busy === '/pair/start' ? 'Pairing...' : 'Start pairing'}
-              </button>
-            </div>
-
-            {devices && devices.length > 0 && (
-              <div className="space-y-2">
-                {devices.map(device => (
-                  <button
-                    key={device.ip}
-                    type="button"
-                    onClick={() => selectDevice(device)}
-                    disabled={busy !== null}
-                    className="w-full flex items-center justify-between p-3 rounded-xl bg-denon-surface border border-denon-border hover:border-denon-gold/50 transition-colors text-left"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-denon-text">{device.name}</p>
-                      <p className="text-xs text-denon-muted mt-0.5">{device.ip} / Select to connect</p>
-                    </div>
-                    <RemoteIcon type="right" className="w-4 h-4 text-denon-gold" />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {(tv.pairing || needsPairing) && (
-              <div className="bg-denon-surface/70 border border-denon-border rounded-xl p-3 space-y-3">
-                <p className="text-xs text-denon-muted">Enter the pairing code shown on the TV.</p>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={pairCode}
-                    onChange={e => setPairCode(e.target.value.toUpperCase())}
-                    onKeyDown={e => e.key === 'Enter' && pairCode.trim() && !busy && finishPairing()}
-                    placeholder="Pairing code"
-                    className="flex-1 bg-denon-dark border border-denon-border rounded-xl px-3 py-2 text-sm text-denon-text placeholder-denon-muted focus:outline-none focus:border-denon-gold/50"
-                  />
-                  <button className="btn-primary font-medium" disabled={!pairCode.trim() || busy !== null} onClick={finishPairing}>
-                    {busy === '/pair/finish' ? 'Confirming...' : 'Confirm'}
-                  </button>
+              {(tv.pairing || needsPairing) && (
+                <div className="bg-denon-surface/70 border border-denon-border rounded-xl p-3 space-y-3">
+                  <p className="text-xs text-denon-muted">Enter the pairing code shown on the TV.</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={pairCode}
+                      onChange={e => setPairCode(e.target.value.toUpperCase())}
+                      onKeyDown={e => e.key === 'Enter' && pairCode.trim() && !busy && finishPairing()}
+                      placeholder="Pairing code"
+                      className="flex-1 bg-denon-dark border border-denon-border rounded-xl px-3 py-2 text-sm text-denon-text placeholder-denon-muted focus:outline-none focus:border-denon-gold/50"
+                    />
+                    <button className="btn-primary font-medium" disabled={!pairCode.trim() || busy !== null} onClick={finishPairing}>
+                      {busy === '/pair/finish' ? 'Confirming...' : 'Confirm'}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
 
-        {lastError && (
-          <div className="mt-4 bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-sm text-red-300">
-            {lastError}
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-4 gap-1 rounded-2xl border border-denon-border/50 bg-denon-card/50 p-1.5 lg:hidden">
-        {[
-          ['remote', 'Remote'],
-          ['screen', 'Screen'],
-          ['apps', 'Apps'],
-          ['adb', 'ADB'],
-        ].map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setActiveAndroidPanel(id)}
-            className={`rounded-xl px-2 py-2 text-xs font-semibold transition-all ${
-              activeAndroidPanel === id
-                ? 'bg-denon-surface text-denon-gold border border-denon-gold/30'
-                : 'text-denon-muted hover:text-denon-text'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+          {lastError && (
+            <div className="mt-4 bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-sm text-red-300">
+              {lastError}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="lg:grid lg:grid-cols-[minmax(360px,420px)_1fr] lg:items-start lg:gap-4">
         <div className={`${activeAndroidPanel === 'remote' ? '' : 'hidden'} lg:block`}>
