@@ -9,18 +9,23 @@ interface Props {
   wsConnected: boolean
   receiverIp?: string
   onOpenThemeModal: () => void
+  activeZone?: string
 }
 
-export default function StatusBar({ deviceName, state, wsConnected, receiverIp, onOpenThemeModal }: Props) {
+export default function StatusBar({ deviceName, state, wsConnected, receiverIp, onOpenThemeModal, activeZone = 'main' }: Props) {
   const [expanded, setExpanded] = useState(false)
+  const androidTv = (state.android_tv || {}) as any
+  const isAndroidTv = activeZone === 'androidtv'
   const telnetOk = state.connected
+  const androidTvOk = androidTv.connected
   const power = state.power
-  const ok = telnetOk && wsConnected
+  const ok = (isAndroidTv ? androidTvOk : telnetOk) && wsConnected
+  const title = isAndroidTv ? (androidTv.device_name || androidTv.device_info?.model || 'Android TV') : deviceName
 
   return (
     <div className="pt-5 pb-3">
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-lg font-bold text-denon-text tracking-tight">{deviceName}</h1>
+        <h1 className="text-lg font-bold text-denon-text tracking-tight">{title}</h1>
         <div className="flex items-center gap-2">
           <motion.button
             onClick={() => setExpanded(!expanded)}
@@ -75,12 +80,26 @@ export default function StatusBar({ deviceName, state, wsConnected, receiverIp, 
               <span className="text-denon-muted">Receiver IP</span>
               <span className="text-denon-text font-mono">{receiverIp ?? '—'}</span>
             </div>
+            {isAndroidTv && (
+              <div className="flex justify-between">
+                <span className="text-denon-muted">Android TV IP</span>
+                <span className="text-denon-text font-mono">{androidTv.host || '—'}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-denon-muted">Telnet Connection</span>
               <span className={telnetOk ? 'text-denon-green' : 'text-denon-red'}>
                 {telnetOk ? '● Connected' : '● Disconnected'}
               </span>
             </div>
+            {isAndroidTv && (
+              <div className="flex justify-between">
+                <span className="text-denon-muted">Android TV Remote</span>
+                <span className={androidTvOk ? 'text-denon-green' : 'text-denon-red'}>
+                  {androidTvOk ? '● Connected' : '● Disconnected'}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-denon-muted">WebSocket</span>
               <span className={wsConnected ? 'text-denon-green' : 'text-denon-red'}>
@@ -91,13 +110,19 @@ export default function StatusBar({ deviceName, state, wsConnected, receiverIp, 
               <span className="text-denon-muted">Power State</span>
               <span className="text-denon-text">{power === true ? 'On' : power === false ? 'Standby' : 'Unknown'}</span>
             </div>
-            {state.surround_mode && (
+            {isAndroidTv && androidTv.current_app && (
+              <div className="flex justify-between gap-3">
+                <span className="text-denon-muted">Current App</span>
+                <span className="text-denon-text truncate">{androidTv.current_app}</span>
+              </div>
+            )}
+            {!isAndroidTv && state.surround_mode && (
               <div className="flex justify-between">
                 <span className="text-denon-muted">Surround Mode</span>
                 <span className="text-denon-text">{state.surround_mode}</span>
               </div>
             )}
-            {state.eco_mode && (
+            {!isAndroidTv && state.eco_mode && (
               <div className="flex justify-between">
                 <span className="text-denon-muted">Eco Mode</span>
                 <span className="text-denon-text">{state.eco_mode}</span>

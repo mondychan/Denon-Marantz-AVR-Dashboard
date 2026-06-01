@@ -13,11 +13,12 @@ interface Props {
   reason?: string
   onConnect: (ip: string) => void
   onOpenThemeModal: () => void
+  embedded?: boolean
 }
 
 const README_URL = 'https://github.com/OxygenLack/denon-dashboard#quick-start-docker'
 
-export default function ReceiverSetup({ reason, onConnect, onOpenThemeModal }: Props) {
+export default function ReceiverSetup({ reason, onConnect, onOpenThemeModal, embedded = false }: Props) {
   const [scanning, setScanning] = useState(false)
   const [devices, setDevices] = useState<DiscoveredDevice[] | null>(null)
   const [manualIp, setManualIp] = useState('')
@@ -58,7 +59,8 @@ export default function ReceiverSetup({ reason, onConnect, onOpenThemeModal }: P
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-denon-dark p-6 relative">
+    <div className={`${embedded ? 'flex items-start justify-center py-2' : 'min-h-screen flex items-center justify-center bg-denon-dark p-6'} relative`}>
+      {!embedded && (
       <div className="absolute top-4 right-4">
         <motion.button
           onClick={onOpenThemeModal}
@@ -74,6 +76,7 @@ export default function ReceiverSetup({ reason, onConnect, onOpenThemeModal }: P
           </svg>
         </motion.button>
       </div>
+      )}
       <div className="w-full max-w-md space-y-5">
         <div className="text-center">
           <div className="w-16 h-16 rounded-2xl bg-denon-card border border-denon-border flex items-center justify-center mx-auto mb-4">

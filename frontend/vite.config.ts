@@ -6,9 +6,18 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
         ws: true,
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            if (err.code === 'ECONNABORTED' || err.message.includes('ECONNABORTED')) {
+              // Harmless error when browser reloads page and drops WebSocket
+              return;
+            }
+            console.log('proxy error', err);
+          });
+        }
       },
     },
   },

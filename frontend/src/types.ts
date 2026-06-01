@@ -30,6 +30,58 @@ export interface ThemeConfig {
   overrides: Record<string, string>
 }
 
+export interface AndroidTvState {
+  configured: boolean
+  connected: boolean
+  paired: boolean
+  pairing: boolean
+  available: boolean
+  host: string | null
+  device_name: string | null
+  device_mac: string | null
+  device_info: Record<string, any> | null
+  is_on: boolean | null
+  current_app: string | null
+  volume: number | null
+  volume_max: number | null
+  muted: boolean | null
+  error: string | null
+}
+
+export interface AndroidAdbDiagnostics {
+  ping?: boolean
+  storage?: {
+    size_kb: number
+    used_kb: number
+    available_kb: number
+    used_percent: string
+  } | null
+  wifi_ip?: string | null
+  last_error?: string | null
+}
+
+export interface AndroidAdbState {
+  enabled: boolean
+  adb_available: boolean | null
+  host: string | null
+  port: number
+  serial: string | null
+  connected: boolean
+  authorized: boolean
+  state: string | null
+  model: string | null
+  android_version: string | null
+  build: string | null
+  resolution: string | null
+  current_app: {
+    package: string | null
+    activity: string | null
+    name: string | null
+  } | null
+  diagnostics: AndroidAdbDiagnostics
+  last_error: string | null
+}
+
 export interface ReceiverState {
   surround_mode_list?: SurroundModeEntry[]
   connected: boolean
@@ -63,6 +115,8 @@ export interface ReceiverState {
   z2_source_name?: string
   heos_source?: string
   theme_config?: ThemeConfig
+  android_tv?: AndroidTvState
+  android_adb?: AndroidAdbState
 }
 
 export interface SourceEntry {
@@ -79,7 +133,7 @@ export interface DeviceInfo {
   discovering?: boolean
   channel_names?: Record<string, string>
   source_name_map?: Record<string, string>
-  sources?: string[]
+  sources?: (string | SourceEntry)[]
 }
 
 export interface ApiResponse {

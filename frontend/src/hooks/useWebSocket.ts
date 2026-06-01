@@ -18,7 +18,8 @@ export function useWebSocket(): {
 
   const connect = useCallback(() => {
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const url = `${proto}//${window.location.host}/api/v1/ws`
+    const host = window.location.host
+    const url = `${proto}//${host}/api/v1/ws`
 
     const ws = new WebSocket(url)
     wsRef.current = ws

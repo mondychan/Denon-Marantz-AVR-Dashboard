@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { applyThemeConfig } from './theme'
 import { useWebSocket } from './hooks/useWebSocket'
 import ReceiverSetup from './components/ReceiverSetup'
+import AndroidTvRemote from './components/AndroidTvRemote'
 import { useDeviceInfo } from './hooks/useDeviceInfo'
 import { useApi } from './hooks/useApi'
 import StatusBar from './components/StatusBar'
@@ -19,6 +20,8 @@ import Zone2Controls from './components/Zone2Controls'
 import ThemeModal from './components/ThemeModal'
 import { fadeInUp, FAST, SPIN, BOUNCE } from './variants'
 import type { SourceEntry } from './types'
+
+const MemoAndroidTvRemote = memo(AndroidTvRemote)
 
 interface NavTabProps {
   icon: React.ReactNode
@@ -61,7 +64,7 @@ const MemoPowerControl = memo(PowerControl)
 const MemoStatusBar = memo(StatusBar)
 const MemoMediaControls = memo(MediaControls)
 
-type ZoneTab = 'main' | 'zone2'
+type ZoneTab = 'main' | 'zone2' | 'androidtv'
 type Section = 'controls' | 'speakers' | 'audio'
 
 export default function App() {
@@ -124,28 +127,7 @@ export default function App() {
     )
   }
 
-  if (!state.connected) {
-    const reason = info?.receiver_ip === '0.0.0.0' ? 'no_host' : 'connect_failed'
-    return (
-      <>
-        <ReceiverSetup
-          reason={reason}
-          onConnect={() => { /* connection state arrives via WebSocket push */ }}
-          onOpenThemeModal={() => setThemeModalOpen(true)}
-        />
-        <AnimatePresence>
-          {themeModalOpen && (
-            <ThemeModal
-              key="theme-modal"
-              currentConfig={state?.theme_config ?? { base: 'gold', overrides: {} }}
-              onClose={() => setThemeModalOpen(false)}
-              onSaved={cfg => patchState({ theme_config: cfg })}
-            />
-          )}
-        </AnimatePresence>
-      </>
-    )
-  }
+  const setupReason = info?.receiver_ip === '0.0.0.0' ? 'no_host' : 'connect_failed'
 
   const deviceName = info?.device_name ?? 'Denon AVR'
   const zoneName = info?.zone1_name ?? 'Main Zone'
@@ -154,10 +136,19 @@ export default function App() {
     ? info.channel_names
     : FALLBACK_CHANNEL_NAMES
   const sourceNameMap = info?.source_name_map ?? {}
-  const configuredSources: SourceEntry[] = (info?.sources ?? []).map(id => ({
-    id,
-    name: sourceNameMap[id] ?? id,
-  }))
+  const configuredSources: SourceEntry[] = (info?.sources ?? []).map(item => {
+    if (typeof item === 'object' && item !== null && 'id' in item) {
+      return {
+        id: item.id,
+        name: item.name ?? sourceNameMap[item.id] ?? item.id,
+      }
+    }
+    const id = String(item)
+    return {
+      id,
+      name: sourceNameMap[id] ?? id,
+    }
+  })
 
   const mainSections: { id: Section; label: string }[] = [
     { id: 'controls', label: 'Controls' },
@@ -173,6 +164,7 @@ export default function App() {
         wsConnected={wsConnected}
         receiverIp={info?.receiver_ip}
         onOpenThemeModal={() => setThemeModalOpen(true)}
+        activeZone={zone}
       />
 
       {/* Zone selector — hidden on mobile (bottom nav takes over) */}
@@ -207,6 +199,21 @@ export default function App() {
             {z2Name}
           </span>
         </motion.button>
+        <motion.button
+          onClick={() => setZone('androidtv')}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.97 }}
+          className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
+            zone === 'androidtv'
+              ? 'bg-gradient-to-r from-denon-gold to-amber-500 text-denon-dark shadow-lg shadow-denon-gold/25'
+              : 'text-denon-muted hover:text-denon-text'
+          }`}
+        >
+          <span className="flex items-center justify-center gap-2">
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+            Android TV
+          </span>
+        </motion.button>
       </div>
 
       <AnimatePresence mode="wait">
@@ -219,69 +226,80 @@ export default function App() {
             exit="exit"
             transition={FAST}
           >
-            <div className="flex gap-1 mb-4">
-              {mainSections.map(s => (
-                <motion.button
-                  key={s.id}
-                  onClick={() => setActiveSection(s.id)}
-                  whileTap={{ scale: 0.96 }}
-                  className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all ${
-                    activeSection === s.id
-                      ? 'bg-denon-surface text-denon-gold border border-denon-gold/30'
-                      : 'text-denon-muted hover:text-denon-text'
-                  }`}
-                >
-                  {s.label}
-                </motion.button>
-              ))}
-            </div>
+            {!state.connected ? (
+              <ReceiverSetup
+                reason={setupReason}
+                embedded={true}
+                onConnect={() => {}}
+                onOpenThemeModal={() => setThemeModalOpen(true)}
+              />
+            ) : (
+              <>
+                <div className="flex gap-1 mb-4">
+                  {mainSections.map(s => (
+                    <motion.button
+                      key={s.id}
+                      onClick={() => setActiveSection(s.id)}
+                      whileTap={{ scale: 0.96 }}
+                      className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all ${
+                        activeSection === s.id
+                          ? 'bg-denon-surface text-denon-gold border border-denon-gold/30'
+                          : 'text-denon-muted hover:text-denon-text'
+                      }`}
+                    >
+                      {s.label}
+                    </motion.button>
+                  ))}
+                </div>
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeSection}
-                className="space-y-4"
-                variants={fadeInUp}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={FAST}
-              >
-                {activeSection === 'controls' && (
-                  <>
-                    <MemoPowerControl state={state} sendCommand={sendCommand} zone="main" />
-                    <MemoVolumeControl state={state} sendCommand={sendCommand} post={post} />
-                    <MemoMediaControls state={state} sendCommand={sendCommand} post={post} />
-                    <MemoSourceSelector
-                      state={state}
-                      sendCommand={sendCommand}
-                      sources={configuredSources}
-                      sourceNameMap={sourceNameMap}
-                    />
-                    <SurroundMode state={state} sendCommand={sendCommand} />
-                  </>
-                )}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeSection}
+                    className="space-y-4"
+                    variants={fadeInUp}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={FAST}
+                  >
+                    {activeSection === 'controls' && (
+                      <>
+                        <MemoPowerControl state={state} sendCommand={sendCommand} zone="main" />
+                        <MemoVolumeControl state={state} sendCommand={sendCommand} post={post} />
+                        <MemoMediaControls state={state} sendCommand={sendCommand} post={post} />
+                        <MemoSourceSelector
+                          state={state}
+                          sendCommand={sendCommand}
+                          sources={configuredSources}
+                          sourceNameMap={sourceNameMap}
+                        />
+                        <SurroundMode state={state} sendCommand={sendCommand} />
+                      </>
+                    )}
 
-                {activeSection === 'speakers' && (
-                  <>
-                    <MemoChannelLevels
-                      channels={state.channel_volumes ?? {}}
-                      channelNames={channelNames}
-                      sendCommand={sendCommand}
-                      post={post}
-                      calibration={state.speaker_calibration}
-                    />
-                    <SubwooferLevel state={state} post={post} />
-                  </>
-                )}
+                    {activeSection === 'speakers' && (
+                      <>
+                        <MemoChannelLevels
+                          channels={state.channel_volumes ?? {}}
+                          channelNames={channelNames}
+                          sendCommand={sendCommand}
+                          post={post}
+                          calibration={state.speaker_calibration}
+                        />
+                        <SubwooferLevel state={state} post={post} />
+                      </>
+                    )}
 
-                {activeSection === 'audio' && (
-                  <>
-                    <ToneControls state={state} post={post} />
-                    <MemoAudioSettings state={state} post={post} />
-                  </>
-                )}
-              </motion.div>
-            </AnimatePresence>
+                    {activeSection === 'audio' && (
+                      <>
+                        <ToneControls state={state} post={post} />
+                        <MemoAudioSettings state={state} post={post} />
+                      </>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </>
+            )}
           </motion.div>
         )}
 
@@ -294,14 +312,36 @@ export default function App() {
             exit="exit"
             transition={FAST}
           >
-            <Zone2Controls
-              state={state}
-              sendCommand={sendCommand}
-              post={post}
-              sources={configuredSources}
-              sourceNameMap={sourceNameMap}
-              zoneName={z2Name}
-            />
+            {!state.connected ? (
+              <ReceiverSetup
+                reason={setupReason}
+                embedded={true}
+                onConnect={() => {}}
+                onOpenThemeModal={() => setThemeModalOpen(true)}
+              />
+            ) : (
+              <Zone2Controls
+                state={state}
+                sendCommand={sendCommand}
+                post={post}
+                sources={configuredSources}
+                sourceNameMap={sourceNameMap}
+                zoneName={z2Name}
+              />
+            )}
+          </motion.div>
+        )}
+
+        {zone === 'androidtv' && (
+          <motion.div
+            key="androidtv"
+            variants={fadeInUp}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={FAST}
+          >
+            <MemoAndroidTvRemote state={state} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -329,6 +369,16 @@ export default function App() {
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
               <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
               <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+            </svg>
+          }
+        />
+        <NavTab
+          onClick={() => setZone('androidtv')}
+          active={zone === 'androidtv'}
+          label="Android TV"
+          icon={
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+              <rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>
             </svg>
           }
         />

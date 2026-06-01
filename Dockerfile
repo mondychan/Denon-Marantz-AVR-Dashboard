@@ -14,9 +14,12 @@ RUN npm run build
 FROM python:3.13-slim AS production
 WORKDIR /app
 
-# Create non-root user and data directory
-RUN useradd -r -s /bin/false appuser && mkdir -p /data && chown appuser:appuser /data
-VOLUME ["/data"]
+# Create non-root user
+RUN useradd -r -s /bin/false appuser
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends android-tools-adb \
+    && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /data/androidtv /data/adb && chown -R appuser /data
 
 # Install Python dependencies
 COPY backend/requirements.txt .

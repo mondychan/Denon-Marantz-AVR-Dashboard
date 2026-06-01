@@ -6,6 +6,7 @@ export function useDeviceInfo(): {
   info: DeviceInfo | null
   loading: boolean
   refresh: () => void
+  refreshDevice: () => void
 } {
   const [info, setInfo] = useState<DeviceInfo | null>(DEMO_MODE ? DEMO_DEVICE_INFO : null)
   const [loading, setLoading] = useState(!DEMO_MODE)
@@ -18,6 +19,14 @@ export function useDeviceInfo(): {
       .catch(() => setLoading(false))
   }, [])
 
+  const refreshDevice = () => {
+    if (DEMO_MODE) return
+    fetch('/api/v1/device')
+      .then(r => r.json() as Promise<DeviceInfo>)
+      .then(data => setInfo(data))
+      .catch(() => {})
+  }
+
   const refresh = () => {
     if (DEMO_MODE) return
     fetch('/api/v1/refresh', { method: 'POST' })
@@ -27,5 +36,5 @@ export function useDeviceInfo(): {
       .catch(() => {})
   }
 
-  return { info, loading, refresh }
+  return { info, loading, refresh, refreshDevice }
 }
