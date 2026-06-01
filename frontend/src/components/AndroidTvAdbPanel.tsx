@@ -65,7 +65,7 @@ export default function AndroidTvAdbPanel({
   const [text, setText] = useState('')
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [detailsOpen, setDetailsOpen] = useState(false)
+  const [detailsOpen, setDetailsOpen] = useState(mode === 'adb' || !adbStatus?.connected)
   const [powerConfirm, setPowerConfirm] = useState<string | null>(null)
   const [powerCountdown, setPowerCountdown] = useState(10)
   const [uninstallConfirm, setUninstallConfirm] = useState<AppEntry | null>(null)
@@ -79,7 +79,7 @@ export default function AndroidTvAdbPanel({
   const showScreen = mode === 'all' || mode === 'screen'
   const showApps = mode === 'all' || mode === 'apps'
   const showAdb = mode === 'all' || mode === 'adb'
-  const showDetails = detailsOpen || mode === 'adb'
+  const showDetails = detailsOpen
 
   useEffect(() => {
     loadStatus()

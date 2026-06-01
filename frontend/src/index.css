@@ -12,6 +12,22 @@
   --border:     #333333;
   --text:       #E5E5E5;
   --muted:      #888888;
+
+  /* ── Responsive Remote Sizing & Variables ── */
+  --dpad-size: 18rem;
+  --dpad-up-down-w: 6rem;
+  --dpad-up-down-h: 4rem;
+  --dpad-left-right-w: 4rem;
+  --dpad-left-right-h: 6rem;
+  --dpad-ok-size: 7rem;
+  --dpad-offset: 1rem;
+  --dpad-ok-font: 1.5rem;
+  --knob-height: 12rem;
+  --row-height: 3rem;
+  --media-row-height: 3.5rem;
+  --remote-gap: 1.25rem;
+  --remote-card-padding: 1.25rem;
+  --app-pb: 6rem;
 }
 
 @layer base {
@@ -110,4 +126,157 @@ select {
   background-repeat: no-repeat;
   background-position: right 8px center;
   padding-right: 24px;
+}
+
+/* ── Responsive Remote Sizing Overrides ── */
+@media (max-height: 780px) {
+  :root {
+    --dpad-size: 14.5rem;
+    --dpad-up-down-w: 5rem;
+    --dpad-up-down-h: 3rem;
+    --dpad-left-right-w: 3rem;
+    --dpad-left-right-h: 5rem;
+    --dpad-ok-size: 6rem;
+    --dpad-offset: 0.5rem;
+    --dpad-ok-font: 1.25rem;
+    --knob-height: 9rem;
+    --row-height: 2.5rem;
+    --media-row-height: 2.75rem;
+    --remote-gap: 0.75rem;
+    --remote-card-padding: 0.875rem;
+  }
+}
+
+@media (max-height: 700px) {
+  :root {
+    --dpad-size: 13rem;
+    --dpad-up-down-w: 4.5rem;
+    --dpad-up-down-h: 2.5rem;
+    --dpad-left-right-w: 2.5rem;
+    --dpad-left-right-h: 4.5rem;
+    --dpad-ok-size: 5rem;
+    --dpad-offset: 0.35rem;
+    --dpad-ok-font: 1.1rem;
+    --knob-height: 8.5rem;
+    --row-height: 2.25rem;
+    --media-row-height: 2.5rem;
+    --remote-gap: 0.5rem;
+    --remote-card-padding: 0.625rem;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --app-pb: 5.5rem;
+  }
+  @media (max-height: 780px) {
+    :root {
+      --app-pb: 4.75rem;
+    }
+  }
+  @media (max-height: 700px) {
+    :root {
+      --app-pb: 4.25rem;
+    }
+  }
+}
+
+.app-container {
+  padding-bottom: var(--app-pb);
+}
+@media (min-width: 640px) {
+  .app-container {
+    padding-bottom: 2rem !important;
+  }
+}
+
+.status-bar-container {
+  padding-top: 1.25rem;
+  padding-bottom: 0.75rem;
+}
+@media (max-height: 780px) {
+  .status-bar-container {
+    padding-top: 0.75rem;
+    padding-bottom: 0.35rem;
+  }
+}
+@media (max-height: 700px) {
+  .status-bar-container {
+    padding-top: 0.5rem;
+    padding-bottom: 0.25rem;
+  }
+}
+
+.remote-card-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--remote-gap) !important;
+  padding: var(--remote-card-padding) !important;
+}
+
+.dpad-container {
+  width: var(--dpad-size) !important;
+}
+
+.dpad-btn-up {
+  top: var(--dpad-offset) !important;
+  width: var(--dpad-up-down-w) !important;
+  height: var(--dpad-up-down-h) !important;
+}
+
+.dpad-btn-down {
+  bottom: var(--dpad-offset) !important;
+  width: var(--dpad-up-down-w) !important;
+  height: var(--dpad-up-down-h) !important;
+}
+
+.dpad-btn-left {
+  left: var(--dpad-offset) !important;
+  width: var(--dpad-left-right-w) !important;
+  height: var(--dpad-left-right-h) !important;
+}
+
+.dpad-btn-right {
+  right: var(--dpad-offset) !important;
+  width: var(--dpad-left-right-w) !important;
+  height: var(--dpad-left-right-h) !important;
+}
+
+.dpad-btn-ok {
+  width: var(--dpad-ok-size) !important;
+  height: var(--dpad-ok-size) !important;
+  font-size: var(--dpad-ok-font) !important;
+}
+
+.remote-knob {
+  height: var(--knob-height) !important;
+}
+
+.remote-row-btn {
+  height: var(--row-height) !important;
+}
+
+.remote-media-btn {
+  height: var(--media-row-height) !important;
+}
+
+.remote-text-input {
+  height: var(--row-height) !important;
+}
+
+.dpad-container svg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+@media (max-height: 780px) {
+  .dpad-container svg {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+@media (max-height: 700px) {
+  .dpad-container svg {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
 }

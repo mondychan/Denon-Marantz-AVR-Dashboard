@@ -23,7 +23,7 @@ export default function StatusBar({ deviceName, state, wsConnected, receiverIp, 
   const title = isAndroidTv ? (androidTv.device_name || androidTv.device_info?.model || 'Android TV') : deviceName
 
   return (
-    <div className="pt-5 pb-3">
+    <div className="status-bar-container">
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-lg font-bold text-denon-text tracking-tight">{title}</h1>
         <div className="flex items-center gap-2">

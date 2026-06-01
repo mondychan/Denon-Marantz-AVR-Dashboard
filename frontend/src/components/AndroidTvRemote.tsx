@@ -589,10 +589,10 @@ export default function AndroidTvRemote({ state, activeAndroidPanel, setActiveAn
       <div className="lg:grid lg:grid-cols-[minmax(360px,420px)_1fr] lg:items-start lg:gap-4">
         <div className={`${activeAndroidPanel === 'remote' ? '' : 'hidden'} lg:block`}>
           {connected && (
-            <div className="card relative space-y-5">
+            <div className="card relative remote-card-layout">
               <div className="flex items-center justify-between gap-3">
-                <IconButton label="Power" disabled={!connected} onClick={startPowerConfirm} feedbackState={fb('Power')} className="h-10 w-16 rounded-xl bg-denon-red/80 border-denon-red/50 sm:h-12 sm:w-24 sm:rounded-2xl">
-                  <RemoteIcon type="power" className="w-6 h-6" />
+                <IconButton label="Power" disabled={!connected} onClick={startPowerConfirm} feedbackState={fb('Power')} className="remote-row-btn w-16 rounded-xl bg-denon-red/80 border-denon-red/50 sm:w-24 sm:rounded-2xl">
+                  <RemoteIcon type="power" className="w-5 h-5 sm:w-6 sm:h-6" />
                 </IconButton>
                 {adb.enabled !== false && (
                   <AndroidTvLiveView
@@ -602,59 +602,59 @@ export default function AndroidTvRemote({ state, activeAndroidPanel, setActiveAn
                     variant="dialogButton"
                     defaultQuality="low"
                     defaultInterval="balanced"
-                    className="lg:hidden"
+                    className="remote-row-btn lg:hidden"
                   />
                 )}
               </div>
 
-              <div className="relative mx-auto w-[min(18rem,100%)] aspect-square max-[380px]:w-[min(16.5rem,100%)]">
+              <div className="relative mx-auto dpad-container aspect-square">
                 <div className="absolute inset-0 rounded-full bg-denon-surface border border-denon-border shadow-inner" />
-                <IconButton label="Up" disabled={!connected} repeat feedbackState={fb('Up')} onClick={(meta) => sendKey(KEYS.up, 'Up', meta)} className="absolute left-1/2 top-4 -translate-x-1/2 w-24 h-16 rounded-3xl border-transparent bg-transparent max-[380px]:top-3 max-[380px]:w-20 max-[380px]:h-14"><RemoteIcon type="up" className="w-10 h-10" /></IconButton>
-                <IconButton label="Down" disabled={!connected} repeat feedbackState={fb('Down')} onClick={(meta) => sendKey(KEYS.down, 'Down', meta)} className="absolute left-1/2 bottom-4 -translate-x-1/2 w-24 h-16 rounded-3xl border-transparent bg-transparent max-[380px]:bottom-3 max-[380px]:w-20 max-[380px]:h-14"><RemoteIcon type="down" className="w-10 h-10" /></IconButton>
-                <IconButton label="Left" disabled={!connected} repeat feedbackState={fb('Left')} onClick={(meta) => sendKey(KEYS.left, 'Left', meta)} className="absolute left-4 top-1/2 -translate-y-1/2 w-16 h-24 rounded-3xl border-transparent bg-transparent max-[380px]:left-3 max-[380px]:w-14 max-[380px]:h-20"><RemoteIcon type="left" className="w-10 h-10" /></IconButton>
-                <IconButton label="Right" disabled={!connected} repeat feedbackState={fb('Right')} onClick={(meta) => sendKey(KEYS.right, 'Right', meta)} className="absolute right-4 top-1/2 -translate-y-1/2 w-16 h-24 rounded-3xl border-transparent bg-transparent max-[380px]:right-3 max-[380px]:w-14 max-[380px]:h-20"><RemoteIcon type="right" className="w-10 h-10" /></IconButton>
-                <IconButton label="OK" disabled={!connected} feedbackState={fb('OK')} onClick={() => sendKey(KEYS.ok, 'OK')} className="absolute left-1/2 top-1/2 w-28 h-28 -translate-x-1/2 -translate-y-1/2 rounded-full bg-denon-card border-denon-border text-2xl font-light max-[380px]:w-24 max-[380px]:h-24">
+                <IconButton label="Up" disabled={!connected} repeat feedbackState={fb('Up')} onClick={(meta) => sendKey(KEYS.up, 'Up', meta)} className="absolute left-1/2 dpad-btn-up -translate-x-1/2 rounded-3xl border-transparent bg-transparent"><RemoteIcon type="up" className="w-8 h-8 sm:w-10 sm:h-10" /></IconButton>
+                <IconButton label="Down" disabled={!connected} repeat feedbackState={fb('Down')} onClick={(meta) => sendKey(KEYS.down, 'Down', meta)} className="absolute left-1/2 dpad-btn-down -translate-x-1/2 rounded-3xl border-transparent bg-transparent"><RemoteIcon type="down" className="w-8 h-8 sm:w-10 sm:h-10" /></IconButton>
+                <IconButton label="Left" disabled={!connected} repeat feedbackState={fb('Left')} onClick={(meta) => sendKey(KEYS.left, 'Left', meta)} className="absolute top-1/2 dpad-btn-left -translate-y-1/2 rounded-3xl border-transparent bg-transparent"><RemoteIcon type="left" className="w-8 h-8 sm:w-10 sm:h-10" /></IconButton>
+                <IconButton label="Right" disabled={!connected} repeat feedbackState={fb('Right')} onClick={(meta) => sendKey(KEYS.right, 'Right', meta)} className="absolute top-1/2 dpad-btn-right -translate-y-1/2 rounded-3xl border-transparent bg-transparent"><RemoteIcon type="right" className="w-8 h-8 sm:w-10 sm:h-10" /></IconButton>
+                <IconButton label="OK" disabled={!connected} feedbackState={fb('OK')} onClick={() => sendKey(KEYS.ok, 'OK')} className="absolute left-1/2 top-1/2 dpad-btn-ok -translate-x-1/2 -translate-y-1/2 rounded-full bg-denon-card border-denon-border font-light">
                   OK
                 </IconButton>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
-                <IconButton label="Back" disabled={!connected} feedbackState={fb('Back')} onClick={() => sendKey(KEYS.back, 'Back')} className="h-12 rounded-2xl"><RemoteIcon type="back" /></IconButton>
-                <IconButton label="Home" disabled={!connected} feedbackState={fb('Home')} onClick={() => sendKey(KEYS.home, 'Home')} className="h-12 rounded-2xl"><RemoteIcon type="home" /></IconButton>
-                <IconButton label="Menu" disabled={!connected} feedbackState={fb('Menu')} onClick={() => sendKey(KEYS.menu, 'Menu')} className="h-12 rounded-2xl"><RemoteIcon type="menu" /></IconButton>
+                <IconButton label="Back" disabled={!connected} feedbackState={fb('Back')} onClick={() => sendKey(KEYS.back, 'Back')} className="remote-row-btn rounded-xl sm:rounded-2xl"><RemoteIcon type="back" className="w-5 h-5 sm:w-6 sm:h-6" /></IconButton>
+                <IconButton label="Home" disabled={!connected} feedbackState={fb('Home')} onClick={() => sendKey(KEYS.home, 'Home')} className="remote-row-btn rounded-xl sm:rounded-2xl"><RemoteIcon type="home" className="w-5 h-5 sm:w-6 sm:h-6" /></IconButton>
+                <IconButton label="Menu" disabled={!connected} feedbackState={fb('Menu')} onClick={() => sendKey(KEYS.menu, 'Menu')} className="remote-row-btn rounded-xl sm:rounded-2xl"><RemoteIcon type="menu" className="w-5 h-5 sm:w-6 sm:h-6" /></IconButton>
               </div>
 
               <div className="grid grid-cols-3 gap-4 items-center">
-                <div className="h-48 rounded-full bg-denon-surface border border-denon-border overflow-hidden grid grid-rows-3">
-                  <IconButton label="Volume up" disabled={!connected} repeat feedbackState={fb('Volume up')} onClick={(meta) => sendKey(KEYS.volUp, 'Volume up', meta)} className="rounded-none border-0 bg-transparent text-4xl">+</IconButton>
-                  <div className="flex items-center justify-center text-denon-text text-lg select-none">VOL</div>
-                  <IconButton label="Volume down" disabled={!connected} repeat feedbackState={fb('Volume down')} onClick={(meta) => sendKey(KEYS.volDown, 'Volume down', meta)} className="rounded-none border-0 bg-transparent text-4xl">-</IconButton>
+                <div className="remote-knob rounded-full bg-denon-surface border border-denon-border overflow-hidden grid grid-rows-3">
+                  <IconButton label="Volume up" disabled={!connected} repeat feedbackState={fb('Volume up')} onClick={(meta) => sendKey(KEYS.volUp, 'Volume up', meta)} className="rounded-none border-0 bg-transparent text-2xl sm:text-4xl">+</IconButton>
+                  <div className="flex items-center justify-center text-denon-text text-sm sm:text-lg select-none">VOL</div>
+                  <IconButton label="Volume down" disabled={!connected} repeat feedbackState={fb('Volume down')} onClick={(meta) => sendKey(KEYS.volDown, 'Volume down', meta)} className="rounded-none border-0 bg-transparent text-2xl sm:text-4xl">-</IconButton>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   <IconButton
                     label={tv.muted ? 'Mute on' : 'Mute'}
                     disabled={!connected}
                     feedbackState={fb('Mute')}
                     onClick={() => sendKey(KEYS.mute, 'Mute')}
-                    className={`w-full h-12 rounded-2xl gap-2 ${tv.muted ? 'border-denon-gold bg-denon-gold/25 text-denon-gold shadow-lg shadow-denon-gold/15' : ''}`}
+                    className={`w-full remote-row-btn rounded-xl sm:rounded-2xl gap-2 ${tv.muted ? 'border-denon-gold bg-denon-gold/25 text-denon-gold shadow-lg shadow-denon-gold/15' : ''}`}
                   >
-                    <RemoteIcon type="mute" />
-                    {tv.muted && <span className="text-xs font-bold tracking-wide">MUTED</span>}
+                    <RemoteIcon type="mute" className="w-5 h-5 sm:w-6 sm:h-6" />
+                    {tv.muted && <span className="text-[10px] sm:text-xs font-bold tracking-wide">MUTED</span>}
                   </IconButton>
-                  <IconButton label="Sleep" disabled={!connected} feedbackState={fb('Sleep')} onClick={() => sendKey(KEYS.sleep, 'Sleep')} className="w-full h-12 rounded-2xl text-sm font-semibold">SLEEP</IconButton>
+                  <IconButton label="Sleep" disabled={!connected} feedbackState={fb('Sleep')} onClick={() => sendKey(KEYS.sleep, 'Sleep')} className="w-full remote-row-btn rounded-xl sm:rounded-2xl text-xs sm:text-sm font-semibold">SLEEP</IconButton>
                 </div>
-                <div className="h-48 rounded-full bg-denon-surface border border-denon-border overflow-hidden grid grid-rows-3">
-                  <IconButton label="Channel up" disabled={!connected} repeat feedbackState={fb('Channel up')} onClick={(meta) => sendKey(KEYS.chUp, 'Channel up', meta)} className="rounded-none border-0 bg-transparent text-4xl">+</IconButton>
-                  <div className="flex items-center justify-center text-denon-text text-lg select-none">CH</div>
-                  <IconButton label="Channel down" disabled={!connected} repeat feedbackState={fb('Channel down')} onClick={(meta) => sendKey(KEYS.chDown, 'Channel down', meta)} className="rounded-none border-0 bg-transparent text-4xl">-</IconButton>
+                <div className="remote-knob rounded-full bg-denon-surface border border-denon-border overflow-hidden grid grid-rows-3">
+                  <IconButton label="Channel up" disabled={!connected} repeat feedbackState={fb('Channel up')} onClick={(meta) => sendKey(KEYS.chUp, 'Channel up', meta)} className="rounded-none border-0 bg-transparent text-2xl sm:text-4xl">+</IconButton>
+                  <div className="flex items-center justify-center text-denon-text text-sm sm:text-lg select-none">CH</div>
+                  <IconButton label="Channel down" disabled={!connected} repeat feedbackState={fb('Channel down')} onClick={(meta) => sendKey(KEYS.chDown, 'Channel down', meta)} className="rounded-none border-0 bg-transparent text-2xl sm:text-4xl">-</IconButton>
                 </div>
               </div>
 
               <div className="grid grid-cols-4 gap-3">
-                <IconButton label="Previous" disabled={!connected} repeat feedbackState={fb('Previous')} onClick={(meta) => sendKey(KEYS.prev, 'Previous', meta)} className="h-14 rounded-full"><RemoteIcon type="prev" /></IconButton>
-                <IconButton label="Stop" disabled={!connected} feedbackState={fb('Stop')} onClick={() => sendKey(KEYS.stop, 'Stop')} className="h-14 rounded-full"><RemoteIcon type="stop" /></IconButton>
-                <IconButton label="Play/Pause" disabled={!connected} feedbackState={fb('Play/Pause')} onClick={() => sendKey(KEYS.playPause, 'Play/Pause')} className="h-14 rounded-full"><RemoteIcon type="playPause" /></IconButton>
-                <IconButton label="Next" disabled={!connected} repeat feedbackState={fb('Next')} onClick={(meta) => sendKey(KEYS.next, 'Next', meta)} className="h-14 rounded-full"><RemoteIcon type="next" /></IconButton>
+                <IconButton label="Previous" disabled={!connected} repeat feedbackState={fb('Previous')} onClick={(meta) => sendKey(KEYS.prev, 'Previous', meta)} className="remote-media-btn rounded-full"><RemoteIcon type="prev" className="w-5 h-5 sm:w-6 sm:h-6" /></IconButton>
+                <IconButton label="Stop" disabled={!connected} feedbackState={fb('Stop')} onClick={() => sendKey(KEYS.stop, 'Stop')} className="remote-media-btn rounded-full"><RemoteIcon type="stop" className="w-5 h-5 sm:w-6 sm:h-6" /></IconButton>
+                <IconButton label="Play/Pause" disabled={!connected} feedbackState={fb('Play/Pause')} onClick={() => sendKey(KEYS.playPause, 'Play/Pause')} className="remote-media-btn rounded-full"><RemoteIcon type="playPause" className="w-5 h-5 sm:w-6 sm:h-6" /></IconButton>
+                <IconButton label="Next" disabled={!connected} repeat feedbackState={fb('Next')} onClick={(meta) => sendKey(KEYS.next, 'Next', meta)} className="remote-media-btn rounded-full"><RemoteIcon type="next" className="w-5 h-5 sm:w-6 sm:h-6" /></IconButton>
               </div>
 
               <div className="flex gap-2">
@@ -665,9 +665,9 @@ export default function AndroidTvRemote({ state, activeAndroidPanel, setActiveAn
                   onKeyDown={e => e.key === 'Enter' && sendText()}
                   placeholder="Send text to Android TV"
                   disabled={!connected}
-                  className="flex-1 bg-denon-surface border border-denon-border rounded-xl px-3 py-2 text-sm text-denon-text placeholder-denon-muted focus:outline-none focus:border-denon-gold/50 disabled:opacity-40"
+                  className="flex-1 bg-denon-surface border border-denon-border rounded-xl px-3 py-2 text-sm text-denon-text placeholder-denon-muted focus:outline-none focus:border-denon-gold/50 disabled:opacity-40 remote-text-input"
                 />
-                <button className="btn-primary font-medium" disabled={!connected || !text.trim() || busy !== null} onClick={sendText}>
+                <button className="btn-primary font-medium remote-row-btn px-4 rounded-xl" disabled={!connected || !text.trim() || busy !== null} onClick={sendText}>
                   Send
                 </button>
               </div>

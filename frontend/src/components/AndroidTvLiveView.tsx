@@ -265,7 +265,7 @@ export default function AndroidTvLiveView({
         <button
           type="button"
           onClick={openFullscreen}
-          className={`flex h-10 items-center justify-center gap-2 rounded-xl border border-denon-border bg-denon-surface/70 px-3 text-xs font-semibold text-denon-text transition-all active:scale-95 hover:border-denon-gold/40 ${className}`}
+          className={`flex remote-row-btn items-center justify-center gap-2 rounded-xl border border-denon-border bg-denon-surface/70 px-3 text-xs font-semibold text-denon-text transition-all active:scale-95 hover:border-denon-gold/40 ${className}`}
         >
           <svg className="h-4 w-4 text-denon-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="5" width="18" height="12" rx="2" />
