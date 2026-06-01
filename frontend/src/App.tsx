@@ -158,7 +158,9 @@ export default function App() {
   ]
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pb-24 sm:pb-8 min-h-screen">
+    <div className={`mx-auto px-4 pb-24 sm:pb-8 min-h-screen transition-all duration-300 ${
+      zone === 'androidtv' ? 'max-w-5xl' : 'max-w-2xl'
+    }`}>
       <MemoStatusBar
         deviceName={deviceName}
         state={state}
