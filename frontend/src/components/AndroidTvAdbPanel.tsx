@@ -399,7 +399,7 @@ export default function AndroidTvAdbPanel({
       )}
 
       {showScreen && (
-      <div className={mode === 'screen' ? 'space-y-3' : 'grid gap-3 sm:grid-cols-2'}>
+      <div className={mode === 'screen' ? 'space-y-3' : 'grid gap-3 xl:grid-cols-2'}>
         <AndroidTvLiveView
           adbConnected={connected}
           remoteConnected={Boolean(tv?.connected)}
