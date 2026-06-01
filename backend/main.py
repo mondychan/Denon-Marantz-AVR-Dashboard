@@ -182,7 +182,7 @@ class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
         )
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            "img-src 'self' blob: http: https:; "
+            "img-src 'self' blob: data: http: https:; "
             "style-src 'self' 'unsafe-inline'; "
             "script-src 'self'; "
             "connect-src 'self' ws: wss:; "
